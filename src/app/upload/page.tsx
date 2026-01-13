@@ -2,8 +2,44 @@
 
 import { useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { useLicenseStore } from "@/lib/store";
+
+// Compress image to reduce size
+const compressImage = (file: File, maxWidth = 800): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new window.Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          reject(new Error("Canvas context not available"));
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0, width, height);
+        const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.8);
+        resolve(compressedDataUrl);
+      };
+      img.onerror = reject;
+      img.src = e.target?.result as string;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
 
 export default function UploadPage() {
   const router = useRouter();
@@ -12,24 +48,26 @@ export default function UploadPage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(userInfo.photoUrl);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileSelect = useCallback((file: File) => {
+  const handleFileSelect = useCallback(async (file: File) => {
     if (!file.type.startsWith("image/")) {
       alert("이미지 파일만 업로드 가능합니다.");
       return;
     }
 
-    if (file.size > 10 * 1024 * 1024) {
-      alert("파일 크기는 10MB 이하여야 합니다.");
+    if (file.size > 20 * 1024 * 1024) {
+      alert("파일 크기는 20MB 이하여야 합니다.");
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const result = e.target?.result as string;
-      setPreviewUrl(result);
-      setUserInfo({ photoUrl: result });
-    };
-    reader.readAsDataURL(file);
+    try {
+      // Compress image to reduce size for API calls
+      const compressedDataUrl = await compressImage(file, 800);
+      setPreviewUrl(compressedDataUrl);
+      setUserInfo({ photoUrl: compressedDataUrl });
+    } catch (error) {
+      console.error("Image compression failed:", error);
+      alert("이미지 처리에 실패했습니다. 다시 시도해주세요.");
+    }
   }, [setUserInfo]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -115,7 +153,6 @@ export default function UploadPage() {
           ref={fileInputRef}
           type="file"
           accept="image/*"
-          capture="user"
           onChange={handleInputChange}
           className="hidden"
         />
@@ -123,11 +160,10 @@ export default function UploadPage() {
         {previewUrl ? (
           <div className="relative mb-6">
             <div className="w-64 h-64 rounded-2xl overflow-hidden border-4 border-space-gold/50 shadow-lg glow">
-              <Image
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src={previewUrl}
                 alt="Preview"
-                width={256}
-                height={256}
                 className="w-full h-full object-cover"
               />
             </div>
