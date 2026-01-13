@@ -163,7 +163,7 @@ export default function ProcessingPage() {
           }
           await transformImage(id);
         }
-      }, 2000);
+      }, 5000); // 5초 간격 폴링 (Redis 커맨드 최적화)
     };
 
     const transformImage = async (id?: string) => {
