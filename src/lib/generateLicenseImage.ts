@@ -114,11 +114,6 @@ export async function generateLicenseImage(data: LicenseData): Promise<string> {
   ctx.font = "14px Arial";
   ctx.fillText(company, 180, 350);
 
-  // Class
-  ctx.fillStyle = "rgba(250, 204, 21, 0.8)";
-  ctx.font = "11px Arial";
-  ctx.fillText("CLASS: 신입 우주비행사", 180, 370);
-
   // Commitment box
   ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
   ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";

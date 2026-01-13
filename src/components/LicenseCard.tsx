@@ -91,12 +91,9 @@ const LicenseCard = forwardRef<HTMLDivElement, LicenseCardProps>(
             </p>
           </div>
 
-          {/* Company & Class */}
+          {/* Company */}
           <div className="text-center mb-4">
-            <p className="text-gray-300 text-sm mb-1">{company}</p>
-            <p className="text-yellow-400/80 text-xs tracking-wider">
-              CLASS: 신입 우주비행사
-            </p>
+            <p className="text-gray-300 text-sm">{company}</p>
           </div>
 
           {/* Commitment */}
