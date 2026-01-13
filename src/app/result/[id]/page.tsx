@@ -115,7 +115,7 @@ export default function ResultPage({ params }: { params: Promise<{ id: string }>
       </div>
 
       {/* License Card */}
-      <div className="mb-8 transform scale-[0.85] origin-top">
+      <div className="mb-4 transform scale-[0.85] origin-top">
         <LicenseCard
           ref={cardRef}
           name={userInfo.name}
