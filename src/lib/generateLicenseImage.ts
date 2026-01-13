@@ -166,24 +166,24 @@ export async function generateLicenseImage(data: LicenseData): Promise<string> {
   }
 
   // Text below photo
-  const textStartY = photoY + photoHeight + 16; // 16px below photo
+  const textStartY = photoY + photoHeight + 12; // 12px below photo
 
   // Name
   ctx.fillStyle = "#ffffff";
   ctx.font = "bold 30px Arial";
-  ctx.fillText(name, 180, textStartY + 72);
+  ctx.fillText(name, 180, textStartY + 24);
 
   // Company
   ctx.fillStyle = "#d1d5db";
   ctx.font = "16px Arial";
-  ctx.fillText(company, 180, textStartY + 100);
+  ctx.fillText(company, 180, textStartY + 48);
 
   // Commitment box - dynamic height based on text length
   const commitmentBoxHeight = 50 + extraHeight;
   ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
   ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
   ctx.lineWidth = 1;
-  roundRect(ctx, 60, textStartY + 115, 240, commitmentBoxHeight, 12);
+  roundRect(ctx, 60, textStartY + 60, 240, commitmentBoxHeight, 12);
   ctx.fill();
   ctx.stroke();
 
@@ -191,7 +191,7 @@ export async function generateLicenseImage(data: LicenseData): Promise<string> {
   ctx.fillStyle = "#e5e7eb";
   ctx.font = "italic 15px Arial";
   const commitmentText = `"${commitment}"`;
-  wrapText(ctx, commitmentText, 180, textStartY + 145, 220, 18);
+  wrapText(ctx, commitmentText, 180, textStartY + 90, 220, 18);
 
   // Footer position - relative to dynamic height
   const footerY = dynamicHeight - 40;
