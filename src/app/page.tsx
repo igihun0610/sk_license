@@ -22,18 +22,20 @@ export default function Home() {
 
       {/* Logo area */}
       <div className="mb-8 text-center">
-        <div className="text-6xl mb-4 animate-float">🧑‍🚀</div>
         <div className="text-sm tracking-widest text-space-gold font-semibold mb-2">
           2026 SK 신입구성원 과정
         </div>
       </div>
 
-      {/* Main title */}
-      <h1 className="text-3xl font-bold text-center mb-4 text-white">
-        우주비행사
-        <br />
-        <span className="text-space-gold">라이선스</span> 발급
-      </h1>
+      {/* Main title with astronaut */}
+      <div className="flex items-center justify-center gap-3 mb-4">
+        <h1 className="text-3xl font-bold text-center text-white">
+          우주비행사
+          <br />
+          <span className="text-space-gold">라이선스</span> 발급
+        </h1>
+        <div className="text-5xl animate-float">🧑‍🚀</div>
+      </div>
 
       {/* Description */}
       <p className="text-center text-gray-300 text-sm mb-12 max-w-xs leading-relaxed">
