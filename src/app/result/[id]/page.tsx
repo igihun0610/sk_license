@@ -113,7 +113,7 @@ export default function ResultPage({ params }: { params: Promise<{ id: string }>
           라이선스 발급 완료!
         </h1>
         <p className="text-gray-400 text-sm">
-          축하합니다! 우주비행사가 되었습니다
+          신입우주비행사가 되신 것을 축하합니다.
         </p>
       </div>
 
