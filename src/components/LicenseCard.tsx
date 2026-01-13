@@ -111,9 +111,15 @@ const LicenseCard = forwardRef<HTMLDivElement, LicenseCardProps>(
           {/* Footer */}
           <div className="w-full flex items-center justify-between pb-6 mt-4">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-yellow-400/20 flex items-center justify-center">
-                <span className="text-sm">🧑‍🚀</span>
-              </div>
+              <div
+                className="w-8 h-8 flex items-center justify-center"
+                style={{
+                  backgroundImage: "url(/img/sk.png)",
+                  backgroundSize: "contain",
+                  backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
+                }}
+              />
               <span className="text-gray-400 text-xs">2026 SK 신입구성원 과정</span>
             </div>
             <div className="text-right">

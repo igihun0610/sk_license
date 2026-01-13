@@ -135,18 +135,19 @@ export async function generateLicenseImage(data: LicenseData): Promise<string> {
   wrapText(ctx, commitmentText, 180, 430, 220, 18);
 
   // Footer - 2026 SK 신입구성원 과정
-  ctx.fillStyle = "rgba(250, 204, 21, 0.2)";
-  ctx.beginPath();
-  ctx.arc(45, 520, 16, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.font = "12px Arial";
-  ctx.fillText("🧑‍🚀", 45, 524);
+  // Draw SK logo
+  try {
+    const skLogo = await loadImage("/img/sk.png");
+    const logoSize = 28;
+    ctx.drawImage(skLogo, 30, 506, logoSize, logoSize);
+  } catch (e) {
+    console.error("Failed to load SK logo:", e);
+  }
 
   ctx.fillStyle = "#9ca3af";
   ctx.font = "11px Arial";
   ctx.textAlign = "left";
-  ctx.fillText("2026 SK 신입구성원 과정", 70, 524);
+  ctx.fillText("2026 SK 신입구성원 과정", 62, 524);
 
   // Footer - ISSUED date
   ctx.textAlign = "right";
