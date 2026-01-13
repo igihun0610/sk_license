@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef, useState, useEffect, useCallback } from "react";
+import { forwardRef, useState, useEffect, useCallback, useRef } from "react";
 
 interface LicenseCardProps {
   name: string;
@@ -17,67 +17,125 @@ const LicenseCard = forwardRef<HTMLDivElement, LicenseCardProps>(
     // 3D tilt state
     const [tilt, setTilt] = useState({ x: 0, y: 0 });
     const [isGyroActive, setIsGyroActive] = useState(false);
+    const [needsPermission, setNeedsPermission] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
+
+    // Refs for smooth animation
+    const targetTilt = useRef({ x: 0, y: 0 });
+    const animationRef = useRef<number>();
+
+    // Check if mobile device
+    useEffect(() => {
+      const checkMobile = () => {
+        const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        setIsMobile(mobile);
+      };
+      checkMobile();
+    }, []);
+
+    // Smooth animation loop using lerp
+    useEffect(() => {
+      const animate = () => {
+        setTilt(prev => {
+          const lerpFactor = 0.15; // Smoothing factor (0-1, lower = smoother)
+          const newX = prev.x + (targetTilt.current.x - prev.x) * lerpFactor;
+          const newY = prev.y + (targetTilt.current.y - prev.y) * lerpFactor;
+
+          // Only update if there's significant change
+          if (Math.abs(newX - prev.x) > 0.01 || Math.abs(newY - prev.y) > 0.01) {
+            return { x: newX, y: newY };
+          }
+          return prev;
+        });
+        animationRef.current = requestAnimationFrame(animate);
+      };
+
+      animationRef.current = requestAnimationFrame(animate);
+      return () => {
+        if (animationRef.current) {
+          cancelAnimationFrame(animationRef.current);
+        }
+      };
+    }, []);
 
     // Handle device orientation for mobile gyro
     const handleOrientation = useCallback((event: DeviceOrientationEvent) => {
       const { beta, gamma } = event;
-      // Only activate gyro if we actually get valid data
-      if (beta !== null && gamma !== null && (beta !== 0 || gamma !== 0)) {
+      if (beta !== null && gamma !== null) {
         setIsGyroActive(true);
-        // Limit tilt range to -15 to 15 degrees
-        const tiltX = Math.max(-15, Math.min(15, gamma * 0.5));
-        const tiltY = Math.max(-15, Math.min(15, (beta - 45) * 0.5));
-        setTilt({ x: tiltX, y: tiltY });
+        // Smoother tilt calculation with reduced sensitivity
+        const tiltX = Math.max(-12, Math.min(12, gamma * 0.3));
+        const tiltY = Math.max(-12, Math.min(12, (beta - 45) * 0.3));
+        targetTilt.current = { x: tiltX, y: tiltY };
       }
     }, []);
 
     // Request permission for iOS 13+
-    const requestPermission = useCallback(async () => {
-      if (typeof (DeviceOrientationEvent as unknown as { requestPermission?: () => Promise<string> }).requestPermission === 'function') {
+    const requestGyroPermission = useCallback(async () => {
+      const DeviceOrientationEventTyped = DeviceOrientationEvent as unknown as {
+        requestPermission?: () => Promise<string>;
+      };
+
+      if (typeof DeviceOrientationEventTyped.requestPermission === 'function') {
         try {
-          const permission = await (DeviceOrientationEvent as unknown as { requestPermission: () => Promise<string> }).requestPermission();
+          const permission = await DeviceOrientationEventTyped.requestPermission();
           if (permission === 'granted') {
+            setNeedsPermission(false);
             window.addEventListener('deviceorientation', handleOrientation);
           }
         } catch (error) {
           console.error('Gyro permission denied:', error);
         }
-      } else {
-        // Non-iOS devices - just add listener, gyro will activate when data comes
-        window.addEventListener('deviceorientation', handleOrientation);
       }
     }, [handleOrientation]);
 
+    // Initialize gyro on mount
     useEffect(() => {
-      // Check if device orientation is available
-      if (typeof window !== 'undefined' && 'DeviceOrientationEvent' in window) {
-        requestPermission();
+      if (typeof window === 'undefined') return;
+
+      const DeviceOrientationEventTyped = DeviceOrientationEvent as unknown as {
+        requestPermission?: () => Promise<string>;
+      };
+
+      // Check if iOS needs permission
+      if (typeof DeviceOrientationEventTyped.requestPermission === 'function') {
+        setNeedsPermission(true);
+      } else if ('DeviceOrientationEvent' in window) {
+        // Android and other devices - just add listener
+        window.addEventListener('deviceorientation', handleOrientation);
       }
 
       return () => {
         window.removeEventListener('deviceorientation', handleOrientation);
       };
-    }, [handleOrientation, requestPermission]);
+    }, [handleOrientation]);
 
-    // Handle mouse move for desktop
+    // Handle mouse move for desktop only
     const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-      if (isGyroActive) return; // Skip if gyro is actively sending data
+      if (isGyroActive || isMobile) return;
 
       const rect = e.currentTarget.getBoundingClientRect();
       const centerX = rect.left + rect.width / 2;
       const centerY = rect.top + rect.height / 2;
 
-      const tiltX = ((e.clientX - centerX) / (rect.width / 2)) * 15;
-      const tiltY = ((e.clientY - centerY) / (rect.height / 2)) * -15;
+      const tiltX = ((e.clientX - centerX) / (rect.width / 2)) * 12;
+      const tiltY = ((e.clientY - centerY) / (rect.height / 2)) * -12;
 
-      setTilt({ x: tiltX, y: tiltY });
-    }, [isGyroActive]);
+      targetTilt.current = { x: tiltX, y: tiltY };
+    }, [isGyroActive, isMobile]);
 
     const handleMouseLeave = useCallback(() => {
-      if (!isGyroActive) {
-        setTilt({ x: 0, y: 0 });
+      if (!isGyroActive && !isMobile) {
+        targetTilt.current = { x: 0, y: 0 };
       }
-    }, [isGyroActive]);
+    }, [isGyroActive, isMobile]);
+
+    // Handle card tap for iOS permission
+    const handleCardTap = useCallback(() => {
+      if (needsPermission && isMobile) {
+        requestGyroPermission();
+      }
+    }, [needsPermission, isMobile, requestGyroPermission]);
 
     // Calculate shine position based on tilt
     const shineX = 50 + tilt.x * 3;
@@ -89,37 +147,48 @@ const LicenseCard = forwardRef<HTMLDivElement, LicenseCardProps>(
         style={{ perspective: "1000px" }}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
+        onClick={handleCardTap}
       >
+        {/* iOS Permission prompt */}
+        {needsPermission && isMobile && (
+          <div className="text-center text-yellow-400 text-xs mb-2 animate-pulse">
+            카드를 탭하여 3D 효과를 활성화하세요
+          </div>
+        )}
+
         <div
           ref={ref}
-          className="w-[360px] min-h-[640px] h-auto rounded-3xl overflow-hidden relative transition-transform duration-150 ease-out"
+          className="w-[360px] min-h-[640px] h-auto rounded-3xl overflow-hidden relative"
           style={{
             background: "linear-gradient(180deg, #0a0a1a 0%, #0d1b2a 30%, #1a1a3e 60%, #2d1b4e 100%)",
             transform: `rotateY(${tilt.x}deg) rotateX(${-tilt.y}deg)`,
             transformStyle: "preserve-3d",
+            transition: "transform 0.05s ease-out",
           }}
         >
           {/* Holographic shine effect */}
           <div
-            className="absolute inset-0 pointer-events-none z-20 transition-opacity duration-150"
+            className="absolute inset-0 pointer-events-none z-20"
             style={{
-              background: `radial-gradient(circle at ${shineX}% ${shineY}%, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 20%, transparent 50%)`,
-              opacity: Math.abs(tilt.x) + Math.abs(tilt.y) > 2 ? 1 : 0,
+              background: `radial-gradient(circle at ${shineX}% ${shineY}%, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.1) 25%, transparent 50%)`,
+              opacity: Math.abs(tilt.x) + Math.abs(tilt.y) > 1 ? 1 : 0,
+              transition: "opacity 0.2s ease-out",
             }}
           />
 
           {/* Rainbow holographic overlay */}
           <div
-            className="absolute inset-0 pointer-events-none z-20 transition-opacity duration-150 mix-blend-overlay"
+            className="absolute inset-0 pointer-events-none z-20 mix-blend-overlay"
             style={{
-              background: `linear-gradient(${135 + tilt.x * 2}deg,
-                rgba(255, 0, 0, 0.1) 0%,
-                rgba(255, 165, 0, 0.1) 20%,
-                rgba(255, 255, 0, 0.1) 40%,
-                rgba(0, 255, 0, 0.1) 60%,
-                rgba(0, 0, 255, 0.1) 80%,
-                rgba(238, 130, 238, 0.1) 100%)`,
-              opacity: Math.abs(tilt.x) + Math.abs(tilt.y) > 3 ? 0.6 : 0,
+              background: `linear-gradient(${135 + tilt.x * 3}deg,
+                rgba(255, 0, 0, 0.12) 0%,
+                rgba(255, 165, 0, 0.12) 20%,
+                rgba(255, 255, 0, 0.12) 40%,
+                rgba(0, 255, 0, 0.12) 60%,
+                rgba(0, 0, 255, 0.12) 80%,
+                rgba(238, 130, 238, 0.12) 100%)`,
+              opacity: Math.abs(tilt.x) + Math.abs(tilt.y) > 2 ? 0.7 : 0,
+              transition: "opacity 0.2s ease-out",
             }}
           />
 
