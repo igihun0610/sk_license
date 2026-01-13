@@ -42,6 +42,7 @@ export default function ProcessingPage() {
   const [queueId, setQueueId] = useState<string | null>(null);
   const hasStarted = useRef(false);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const isTransformingRef = useRef(false); // Prevent duplicate transform calls
 
   // Join queue on mount
   const joinQueue = useCallback(async () => {
@@ -156,7 +157,9 @@ export default function ProcessingPage() {
       pollIntervalRef.current = setInterval(async () => {
         const status = await pollQueueStatus(id);
 
-        if (status === "ready" || status === "disabled") {
+        // Prevent duplicate transform calls with isTransformingRef
+        if ((status === "ready" || status === "disabled") && !isTransformingRef.current) {
+          isTransformingRef.current = true; // Set flag before clearing interval
           if (pollIntervalRef.current) {
             clearInterval(pollIntervalRef.current);
             pollIntervalRef.current = null;

@@ -17,6 +17,24 @@ const PROCESSING_KEY = "transform_processing";
 const MAX_CONCURRENT = 50; // Maximum concurrent transformations (Vercel Pro supports 1000)
 const QUEUE_ITEM_TTL = 300; // 5 minutes TTL for queue items
 
+// Lua script for atomic startProcessing operation
+// This prevents race condition where multiple requests pass the MAX_CONCURRENT check simultaneously
+const START_PROCESSING_SCRIPT = `
+local processingKey = KEYS[1]
+local queueKey = KEYS[2]
+local maxConcurrent = tonumber(ARGV[1])
+local queueId = ARGV[2]
+
+local currentCount = redis.call('SCARD', processingKey)
+if currentCount >= maxConcurrent then
+  return 0
+end
+
+redis.call('ZREM', queueKey, queueId)
+redis.call('SADD', processingKey, queueId)
+return 1
+`;
+
 export interface QueueItem {
   id: string;
   timestamp: number;
@@ -125,7 +143,8 @@ export async function getQueueStatus(queueId: string): Promise<QueueStatus> {
   };
 }
 
-// Start processing (move from queue to processing set)
+// Start processing (move from queue to processing set) - ATOMIC VERSION
+// Uses Lua script to prevent race condition
 export async function startProcessing(queueId: string): Promise<boolean> {
   const redis = getRedis();
 
@@ -134,21 +153,31 @@ export async function startProcessing(queueId: string): Promise<boolean> {
     return true;
   }
 
-  const currentProcessing = await redis.scard(PROCESSING_KEY);
+  try {
+    // Execute Lua script for atomic operation
+    const result = await redis.eval(
+      START_PROCESSING_SCRIPT,
+      [PROCESSING_KEY, QUEUE_KEY],
+      [MAX_CONCURRENT.toString(), queueId]
+    ) as number;
 
-  // Check if we can start processing
-  if ((currentProcessing || 0) >= MAX_CONCURRENT) {
-    return false;
+    if (result === 1) {
+      // Successfully added to processing, set TTL for auto-cleanup
+      await redis.set(`processing_time:${queueId}`, Date.now(), { ex: 120 }); // 2 min max processing time
+    }
+
+    return result === 1;
+  } catch (error) {
+    console.error("Error in startProcessing:", error);
+    // Fallback to non-atomic version if Lua script fails
+    const currentProcessing = await redis.scard(PROCESSING_KEY);
+    if ((currentProcessing || 0) >= MAX_CONCURRENT) {
+      return false;
+    }
+    await redis.zrem(QUEUE_KEY, queueId);
+    await redis.sadd(PROCESSING_KEY, queueId);
+    return true;
   }
-
-  // Remove from queue and add to processing set
-  await redis.zrem(QUEUE_KEY, queueId);
-  await redis.sadd(PROCESSING_KEY, queueId);
-
-  // Set TTL for processing item (auto-cleanup if client disconnects)
-  await redis.expire(`processing:${queueId}`, 60); // 60 seconds max processing time
-
-  return true;
 }
 
 // Complete processing (remove from processing set)
@@ -161,7 +190,7 @@ export async function completeProcessing(queueId: string): Promise<void> {
 
   await redis.srem(PROCESSING_KEY, queueId);
   await redis.del(`queue_item:${queueId}`);
-  await redis.del(`processing:${queueId}`);
+  await redis.del(`processing_time:${queueId}`);
 }
 
 // Leave queue (cleanup if user navigates away)
@@ -175,7 +204,7 @@ export async function leaveQueue(queueId: string): Promise<void> {
   await redis.zrem(QUEUE_KEY, queueId);
   await redis.srem(PROCESSING_KEY, queueId);
   await redis.del(`queue_item:${queueId}`);
-  await redis.del(`processing:${queueId}`);
+  await redis.del(`processing_time:${queueId}`);
 }
 
 // Get overall queue stats (for admin/monitoring)
@@ -193,4 +222,51 @@ export async function getQueueStats(): Promise<{ queueSize: number; processing: 
     queueSize: queueSize || 0,
     processing: processing || 0,
   };
+}
+
+// Cleanup zombie processing items (items that have been processing for too long)
+// Call this before events or periodically to clean up stale items
+export async function cleanupZombieProcessing(): Promise<number> {
+  const redis = getRedis();
+
+  if (!redis) {
+    return 0;
+  }
+
+  let cleanedCount = 0;
+
+  try {
+    // Get all items in processing set
+    const processingItems = await redis.smembers(PROCESSING_KEY);
+
+    for (const queueId of processingItems) {
+      // Check if this item has a valid processing_time key
+      const processingTime = await redis.get(`processing_time:${queueId}`);
+
+      if (!processingTime) {
+        // No processing time recorded - this is a zombie
+        await redis.srem(PROCESSING_KEY, queueId);
+        cleanedCount++;
+        console.log(`Cleaned up zombie processing item: ${queueId}`);
+      }
+    }
+
+    return cleanedCount;
+  } catch (error) {
+    console.error("Error cleaning up zombie processing:", error);
+    return cleanedCount;
+  }
+}
+
+// Reset all queue data (use before events to ensure clean state)
+export async function resetQueue(): Promise<void> {
+  const redis = getRedis();
+
+  if (!redis) {
+    return;
+  }
+
+  await redis.del(QUEUE_KEY);
+  await redis.del(PROCESSING_KEY);
+  console.log("Queue reset complete");
 }
