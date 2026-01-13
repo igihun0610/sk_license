@@ -85,14 +85,34 @@ export default function UploadPage() {
 
     setIsUploading(true);
 
-    // Skip server processing - use photo directly
-    // In production, this would call AI API for image transformation
-    setUserInfo({ transformedPhotoUrl: previewUrl });
+    try {
+      // Call AI transformation API
+      const response = await fetch("/api/transform", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          photoUrl: previewUrl,
+        }),
+      });
 
-    // Short delay for UX
-    await new Promise(resolve => setTimeout(resolve, 500));
+      const data = await response.json();
 
-    router.push("/result/direct");
+      if (data.transformedPhotoUrl) {
+        setUserInfo({ transformedPhotoUrl: data.transformedPhotoUrl });
+      } else {
+        // Fallback to original photo if transformation fails
+        setUserInfo({ transformedPhotoUrl: previewUrl });
+      }
+
+      router.push("/result/direct");
+    } catch (error) {
+      console.error("Transform error:", error);
+      // Fallback to original photo on error
+      setUserInfo({ transformedPhotoUrl: previewUrl });
+      router.push("/result/direct");
+    }
   };
 
   return (
@@ -191,7 +211,7 @@ export default function UploadPage() {
       >
         {isUploading ? (
           <span className="flex items-center justify-center gap-2">
-            <span className="animate-spin">⏳</span> 처리 중...
+            <span className="animate-spin">⏳</span> AI 변환 중...
           </span>
         ) : (
           "우주비행사 변신 🚀"
