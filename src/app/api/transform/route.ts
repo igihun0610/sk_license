@@ -66,7 +66,7 @@ The person's identity MUST be 100% preserved:
 • SK logo color: RED letters "SK"
 • Place SK logo on the chest area as an embroidered patch sewn onto the suit
 
-• Add a KOREAN FLAG (Taegeukgi/태극기) patch on the chest area
+• Add a KOREAN FLAG (Taegeukgi/태극기) patch on the shoulder or arm area
 • Include realistic suit details: zippers, life support connectors
 • The suit should look authentic and high-quality
 
