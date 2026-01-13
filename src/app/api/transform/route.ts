@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
+import { startProcessing, completeProcessing } from "@/lib/queue";
 
 const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
 
@@ -15,11 +16,26 @@ async function sleep(ms: number) {
 }
 
 export async function POST(request: NextRequest) {
+  let queueId: string | undefined;
+
   try {
-    const { photoUrl } = await request.json();
+    const body = await request.json();
+    const { photoUrl } = body;
+    queueId = body.queueId;
 
     if (!photoUrl) {
       return NextResponse.json({ error: "Photo URL is required" }, { status: 400 });
+    }
+
+    // Start processing in queue (if queue is enabled)
+    if (queueId) {
+      const canProcess = await startProcessing(queueId);
+      if (!canProcess) {
+        return NextResponse.json(
+          { error: "Queue is full, please wait", status: "queued" },
+          { status: 429 }
+        );
+      }
     }
 
     // Extract base64 data from data URL
@@ -114,6 +130,10 @@ Photorealistic, high-quality BUST SHOT portrait of the SAME PERSON wearing an SK
               const transformedPhotoUrl = `data:${generatedMimeType};base64,${generatedImageData}`;
 
               console.log(`API success on attempt ${attempt}`);
+              // Complete queue processing
+              if (queueId) {
+                await completeProcessing(queueId);
+              }
               return NextResponse.json({
                 success: true,
                 transformedPhotoUrl
@@ -124,6 +144,9 @@ Photorealistic, high-quality BUST SHOT portrait of the SAME PERSON wearing an SK
 
         // If no image was generated, return original
         console.log("No image generated, using original");
+        if (queueId) {
+          await completeProcessing(queueId);
+        }
         return NextResponse.json({
           success: true,
           transformedPhotoUrl: photoUrl,
@@ -143,6 +166,9 @@ Photorealistic, high-quality BUST SHOT portrait of the SAME PERSON wearing an SK
 
     // All retries failed, return original photo as fallback
     console.error("All API attempts failed, using original photo");
+    if (queueId) {
+      await completeProcessing(queueId);
+    }
     return NextResponse.json({
       success: true,
       transformedPhotoUrl: photoUrl,
@@ -151,6 +177,10 @@ Photorealistic, high-quality BUST SHOT portrait of the SAME PERSON wearing an SK
 
   } catch (error) {
     console.error("Transform API error:", error);
+    // Complete queue processing even on error
+    if (queueId) {
+      await completeProcessing(queueId);
+    }
     return NextResponse.json(
       {
         error: "Failed to transform image",
