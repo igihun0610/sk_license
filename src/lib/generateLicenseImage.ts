@@ -98,26 +98,21 @@ export async function generateLicenseImage(data: LicenseData): Promise<string> {
   ctx.font = "bold 26px Arial";
   ctx.fillText(name, 180, 320);
 
-  // Name spaced
-  ctx.fillStyle = "#9ca3af";
-  ctx.font = "12px Arial";
-  ctx.fillText(name.split("").join(" "), 180, 345);
-
   // Company
   ctx.fillStyle = "#d1d5db";
   ctx.font = "14px Arial";
-  ctx.fillText(company, 180, 375);
+  ctx.fillText(company, 180, 350);
 
   // Class
   ctx.fillStyle = "rgba(250, 204, 21, 0.8)";
   ctx.font = "11px Arial";
-  ctx.fillText("CLASS: 신입 우주비행사", 180, 395);
+  ctx.fillText("CLASS: 신입 우주비행사", 180, 370);
 
   // Commitment box
   ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
   ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
   ctx.lineWidth = 1;
-  roundRect(ctx, 60, 420, 240, 60, 12);
+  roundRect(ctx, 60, 395, 240, 60, 12);
   ctx.fill();
   ctx.stroke();
 
@@ -125,7 +120,7 @@ export async function generateLicenseImage(data: LicenseData): Promise<string> {
   ctx.fillStyle = "#e5e7eb";
   ctx.font = "italic 13px Arial";
   const commitmentText = `"${commitment}"`;
-  wrapText(ctx, commitmentText, 180, 455, 220, 18);
+  wrapText(ctx, commitmentText, 180, 430, 220, 18);
 
   // Footer - SK NEW CREW
   ctx.fillStyle = "rgba(250, 204, 21, 0.2)";

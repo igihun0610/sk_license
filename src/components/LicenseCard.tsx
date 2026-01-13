@@ -86,11 +86,8 @@ const LicenseCard = forwardRef<HTMLDivElement, LicenseCardProps>(
 
           {/* Name */}
           <div className="text-center mb-2">
-            <p className="text-white text-2xl font-bold tracking-wide mb-1">
+            <p className="text-white text-2xl font-bold tracking-wide">
               {name}
-            </p>
-            <p className="text-gray-400 text-sm tracking-widest uppercase">
-              {name.split("").join(" ")}
             </p>
           </div>
 
