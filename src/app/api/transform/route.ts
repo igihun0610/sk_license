@@ -1,18 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 import { startProcessing, completeProcessing } from "@/lib/queue";
+import { getNextKey, getAlternativeKey, markKeyFailed, getApiKeys } from "@/lib/apiKeyManager";
 
-const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
-
-if (!GOOGLE_API_KEY) {
-  console.error("GOOGLE_API_KEY is not configured");
-}
-
-const MAX_RETRIES = 3;
-const RETRY_DELAY = 2000; // 2 seconds
+const MAX_RETRIES_PER_KEY = 2;
+const RETRY_DELAY = 1000; // 1 second
+const MAX_KEY_ROTATIONS = 3; // Try up to 3 different keys
 
 async function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Check if error is rate limit related
+function isRateLimitError(error: Error): boolean {
+  const message = error.message.toLowerCase();
+  return message.includes("429") ||
+         message.includes("rate limit") ||
+         message.includes("quota") ||
+         message.includes("resource exhausted");
+}
+
+// Check if error is auth/key related
+function isAuthError(error: Error): boolean {
+  const message = error.message.toLowerCase();
+  return message.includes("403") ||
+         message.includes("401") ||
+         message.includes("invalid") ||
+         message.includes("api key");
 }
 
 export async function POST(request: NextRequest) {
@@ -47,10 +61,7 @@ export async function POST(request: NextRequest) {
     const mimeType = `image/${base64Match[1]}`;
     const base64Data = base64Match[2];
 
-    // Initialize Google AI client
-    const ai = new GoogleGenAI({ apiKey: GOOGLE_API_KEY });
-
-    // Transform image to astronaut style using Nano Banana model
+    // Build the prompt
     const prompt = [
       {
         inlineData: {
@@ -109,78 +120,117 @@ Photorealistic, high-quality BUST SHOT portrait of the SAME PERSON wearing an SK
       },
     ];
 
-    // Retry logic for API call
+    // Multi-key rotation with retries
+    let currentKey = await getNextKey();
+    let keyRotations = 0;
     let lastError: Error | null = null;
 
-    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-      try {
-        console.log(`API attempt ${attempt}/${MAX_RETRIES}`);
+    const totalKeys = getApiKeys().length;
+    console.log(`Starting transform with ${totalKeys} available API keys`);
 
-        const response = await ai.models.generateContent({
-          model: "gemini-2.5-flash-image",
-          contents: prompt,
-          config: {
-            responseModalities: ["TEXT", "IMAGE"],
-          },
-        });
+    while (keyRotations < Math.min(MAX_KEY_ROTATIONS, totalKeys)) {
+      if (!currentKey) {
+        console.error("No API key available");
+        break;
+      }
 
-        // Extract the generated image
-        if (response.candidates && response.candidates[0]?.content?.parts) {
-          for (const part of response.candidates[0].content.parts) {
-            if (part.inlineData) {
-              const generatedImageData = part.inlineData.data;
-              const generatedMimeType = part.inlineData.mimeType || "image/png";
-              const transformedPhotoUrl = `data:${generatedMimeType};base64,${generatedImageData}`;
+      const keyPrefix = currentKey.substring(0, 10);
+      console.log(`Using API key: ${keyPrefix}... (rotation ${keyRotations + 1}/${MAX_KEY_ROTATIONS})`);
 
-              console.log(`API success on attempt ${attempt}`);
-              // Complete queue processing
-              if (queueId) {
-                await completeProcessing(queueId);
+      // Initialize Google AI client with current key
+      const ai = new GoogleGenAI({ apiKey: currentKey });
+
+      // Retry logic for current key
+      for (let attempt = 1; attempt <= MAX_RETRIES_PER_KEY; attempt++) {
+        try {
+          console.log(`  Attempt ${attempt}/${MAX_RETRIES_PER_KEY} with key ${keyPrefix}...`);
+
+          const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash-image",
+            contents: prompt,
+            config: {
+              responseModalities: ["TEXT", "IMAGE"],
+            },
+          });
+
+          // Extract the generated image
+          if (response.candidates && response.candidates[0]?.content?.parts) {
+            for (const part of response.candidates[0].content.parts) {
+              if (part.inlineData) {
+                const generatedImageData = part.inlineData.data;
+                const generatedMimeType = part.inlineData.mimeType || "image/png";
+                const transformedPhotoUrl = `data:${generatedMimeType};base64,${generatedImageData}`;
+
+                console.log(`SUCCESS with key ${keyPrefix}... on attempt ${attempt}`);
+
+                if (queueId) {
+                  await completeProcessing(queueId);
+                }
+                return NextResponse.json({
+                  success: true,
+                  transformedPhotoUrl
+                });
               }
-              return NextResponse.json({
-                success: true,
-                transformedPhotoUrl
-              });
             }
           }
+
+          // If no image was generated, return original
+          console.log("No image generated, using original");
+          if (queueId) {
+            await completeProcessing(queueId);
+          }
+          return NextResponse.json({
+            success: true,
+            transformedPhotoUrl: photoUrl,
+            message: "Could not generate transformed image, using original"
+          });
+
+        } catch (apiError) {
+          lastError = apiError instanceof Error ? apiError : new Error(String(apiError));
+          console.error(`  Attempt ${attempt} failed:`, lastError.message);
+
+          // Check if we should switch keys immediately
+          if (isRateLimitError(lastError) || isAuthError(lastError)) {
+            console.log(`  Key ${keyPrefix}... hit rate limit or auth error, switching to next key`);
+            await markKeyFailed(currentKey);
+            break; // Exit retry loop, try next key
+          }
+
+          // For other errors, retry with same key
+          if (attempt < MAX_RETRIES_PER_KEY) {
+            console.log(`  Retrying in ${RETRY_DELAY}ms...`);
+            await sleep(RETRY_DELAY);
+          }
         }
+      }
 
-        // If no image was generated, return original
-        console.log("No image generated, using original");
-        if (queueId) {
-          await completeProcessing(queueId);
-        }
-        return NextResponse.json({
-          success: true,
-          transformedPhotoUrl: photoUrl,
-          message: "Could not generate transformed image, using original"
-        });
-
-      } catch (apiError) {
-        lastError = apiError instanceof Error ? apiError : new Error(String(apiError));
-        console.error(`API attempt ${attempt} failed:`, lastError.message);
-
-        if (attempt < MAX_RETRIES) {
-          console.log(`Retrying in ${RETRY_DELAY}ms...`);
-          await sleep(RETRY_DELAY);
+      // Try next key
+      keyRotations++;
+      if (keyRotations < MAX_KEY_ROTATIONS) {
+        const nextKey = await getAlternativeKey(currentKey);
+        if (nextKey && nextKey !== currentKey) {
+          currentKey = nextKey;
+          console.log(`Rotating to next API key...`);
+        } else {
+          console.log("No alternative keys available");
+          break;
         }
       }
     }
 
-    // All retries failed, return original photo as fallback
-    console.error("All API attempts failed, using original photo");
+    // All keys exhausted, return original photo as fallback
+    console.error(`All ${keyRotations} key rotations failed, using original photo`);
     if (queueId) {
       await completeProcessing(queueId);
     }
     return NextResponse.json({
       success: true,
       transformedPhotoUrl: photoUrl,
-      message: "API failed after retries, using original photo"
+      message: "API failed after all retries, using original photo"
     });
 
   } catch (error) {
     console.error("Transform API error:", error);
-    // Complete queue processing even on error
     if (queueId) {
       await completeProcessing(queueId);
     }
@@ -188,7 +238,6 @@ Photorealistic, high-quality BUST SHOT portrait of the SAME PERSON wearing an SK
       {
         error: "Failed to transform image",
         details: error instanceof Error ? error.message : "Unknown error",
-        // Fallback to original image
         transformedPhotoUrl: null
       },
       { status: 500 }

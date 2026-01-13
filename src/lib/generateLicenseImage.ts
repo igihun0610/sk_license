@@ -166,12 +166,12 @@ export async function generateLicenseImage(data: LicenseData): Promise<string> {
   }
 
   // Text below photo
-  const textStartY = photoY + photoHeight + 12; // 12px below photo
+  const textStartY = photoY + photoHeight + 16; // 16px below photo
 
   // Name
   ctx.fillStyle = "#ffffff";
   ctx.font = "bold 30px Arial";
-  ctx.fillText(name, 180, textStartY + 24);
+  ctx.fillText(name, 180, textStartY + 24); // Total gap: 16 + 24 = 40px
 
   // Company
   ctx.fillStyle = "#d1d5db";
