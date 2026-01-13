@@ -28,13 +28,13 @@ export default function Home() {
       </div>
 
       {/* Main title with astronaut */}
-      <div className="flex items-center justify-center gap-3 mb-4">
-        <div className="text-5xl animate-float">🧑‍🚀</div>
-        <h1 className="text-3xl font-bold text-center text-white">
+      <div className="flex flex-col items-center mb-4">
+        <h1 className="text-3xl font-bold text-center text-white mb-3">
           우주비행사
           <br />
           <span className="text-space-gold">라이선스</span> 발급
         </h1>
+        <div className="text-5xl animate-float">🧑‍🚀</div>
       </div>
 
       {/* Description */}
