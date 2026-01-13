@@ -58,9 +58,21 @@ export async function generateLicenseImage(data: LicenseData): Promise<string> {
     ctx.closePath();
     ctx.clip();
 
-    // Draw image centered in circle
-    const size = 150;
-    ctx.drawImage(photo, 180 - size/2, 130 - size/2, size, size);
+    // Draw image with aspect ratio preserved (cover behavior)
+    const targetSize = 150;
+    const imgWidth = photo.naturalWidth || photo.width;
+    const imgHeight = photo.naturalHeight || photo.height;
+
+    // Calculate scale to cover the target area while maintaining aspect ratio
+    const scale2 = Math.max(targetSize / imgWidth, targetSize / imgHeight);
+    const scaledWidth = imgWidth * scale2;
+    const scaledHeight = imgHeight * scale2;
+
+    // Center the image
+    const offsetX = 180 - scaledWidth / 2;
+    const offsetY = 130 - scaledHeight / 2;
+
+    ctx.drawImage(photo, offsetX, offsetY, scaledWidth, scaledHeight);
     ctx.restore();
 
     // Draw photo border
