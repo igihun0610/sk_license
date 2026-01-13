@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, use } from "react";
+import { useRef, useState, use, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toPng } from "html-to-image";
 import LicenseCard from "@/components/LicenseCard";
@@ -11,17 +11,44 @@ export default function ResultPage({ params }: { params: Promise<{ id: string }>
   const router = useRouter();
   const cardRef = useRef<HTMLDivElement>(null);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const { userInfo, reset } = useLicenseStore();
 
+  // Use transformed photo if available, otherwise fallback to original
+  const displayPhotoUrl = userInfo.transformedPhotoUrl || userInfo.photoUrl;
+
+  // Preload image to ensure it's cached
+  useEffect(() => {
+    if (displayPhotoUrl) {
+      const img = new Image();
+      img.onload = () => setImageLoaded(true);
+      img.src = displayPhotoUrl;
+    }
+  }, [displayPhotoUrl]);
+
+  const captureCard = async (): Promise<string> => {
+    if (!cardRef.current) throw new Error("Card ref not found");
+
+    // Wait a bit for rendering
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    return toPng(cardRef.current, {
+      quality: 1.0,
+      pixelRatio: 2,
+      cacheBust: true,
+      skipAutoScale: true,
+      style: {
+        transform: "scale(1)",
+      },
+    });
+  };
+
   const handleDownload = async () => {
-    if (!cardRef.current) return;
+    if (!cardRef.current || !imageLoaded) return;
 
     setIsDownloading(true);
     try {
-      const dataUrl = await toPng(cardRef.current, {
-        quality: 1.0,
-        pixelRatio: 2,
-      });
+      const dataUrl = await captureCard();
 
       // Create download link
       const link = document.createElement("a");
@@ -37,13 +64,10 @@ export default function ResultPage({ params }: { params: Promise<{ id: string }>
   };
 
   const handleShare = async () => {
-    if (!cardRef.current) return;
+    if (!cardRef.current || !imageLoaded) return;
 
     try {
-      const dataUrl = await toPng(cardRef.current, {
-        quality: 1.0,
-        pixelRatio: 2,
-      });
+      const dataUrl = await captureCard();
 
       // Convert data URL to blob
       const response = await fetch(dataUrl);
@@ -72,9 +96,6 @@ export default function ResultPage({ params }: { params: Promise<{ id: string }>
     reset();
     router.push("/");
   };
-
-  // Use transformed photo if available, otherwise fallback to original
-  const displayPhotoUrl = userInfo.transformedPhotoUrl || userInfo.photoUrl;
 
   if (!displayPhotoUrl) {
     router.push("/");
