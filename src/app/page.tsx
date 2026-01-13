@@ -16,7 +16,7 @@ export default function Home() {
         <img
           src="/img/sk.png"
           alt="SK"
-          className="w-20 h-auto mx-auto drop-shadow-lg"
+          className="w-32 h-auto mx-auto drop-shadow-lg"
         />
       </div>
 
