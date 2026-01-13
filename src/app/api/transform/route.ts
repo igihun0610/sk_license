@@ -62,6 +62,12 @@ The person's identity MUST be 100% preserved:
 • NO helmet or visor - face must be completely visible and unobstructed
 • DO NOT crop too tight - we need to see the suit and patches
 
+=== POSE (IMPORTANT) ===
+• Subject should be in a SLIGHTLY ANGLED pose (not straight-on)
+• Turn body slightly to show the ARM with the KOREAN FLAG patch clearly visible
+• This angled pose makes the portrait more dynamic and professional
+• The flag patch on the arm/shoulder must be prominently displayed
+
 === OUTFIT TRANSFORMATION (CRITICAL) ===
 • Replace clothing with a WHITE professional astronaut suit
 
