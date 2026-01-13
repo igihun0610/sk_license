@@ -92,17 +92,6 @@ export default function ProcessingPage() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-6 py-8 relative overflow-hidden">
-      {/* Animated background stars */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-10 left-10 text-2xl animate-pulse">✨</div>
-        <div className="absolute top-20 right-16 text-xl animate-pulse" style={{ animationDelay: "0.5s" }}>🌟</div>
-        <div className="absolute top-40 left-1/4 text-sm animate-pulse" style={{ animationDelay: "1s" }}>⭐</div>
-        <div className="absolute bottom-40 right-10 text-2xl animate-pulse" style={{ animationDelay: "1.5s" }}>🌙</div>
-        <div className="absolute bottom-60 left-8 text-xl animate-pulse" style={{ animationDelay: "0.3s" }}>🪐</div>
-        <div className="absolute top-1/3 right-8 text-lg animate-bounce" style={{ animationDelay: "0.7s" }}>🛸</div>
-        <div className="absolute bottom-32 right-1/4 text-sm animate-pulse" style={{ animationDelay: "1.2s" }}>💫</div>
-      </div>
-
       {/* Main content */}
       <div className="relative z-10 flex flex-col items-center">
         {/* Astronaut animation */}
