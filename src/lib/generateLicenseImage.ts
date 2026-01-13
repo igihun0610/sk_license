@@ -135,11 +135,23 @@ export async function generateLicenseImage(data: LicenseData): Promise<string> {
   wrapText(ctx, commitmentText, 180, 430, 220, 18);
 
   // Footer - 2026 SK 신입구성원 과정
-  // Draw SK logo
+  // Draw SK logo with aspect ratio preserved
   try {
     const skLogo = await loadImage("/img/sk.png");
-    const logoSize = 28;
-    ctx.drawImage(skLogo, 30, 506, logoSize, logoSize);
+    const logoMaxSize = 28;
+    const logoWidth = skLogo.naturalWidth || skLogo.width;
+    const logoHeight = skLogo.naturalHeight || skLogo.height;
+
+    // Scale to fit within maxSize while maintaining aspect ratio
+    const logoScale = Math.min(logoMaxSize / logoWidth, logoMaxSize / logoHeight);
+    const scaledLogoWidth = logoWidth * logoScale;
+    const scaledLogoHeight = logoHeight * logoScale;
+
+    // Center vertically at y=520
+    const logoX = 30;
+    const logoY = 520 - scaledLogoHeight / 2;
+
+    ctx.drawImage(skLogo, logoX, logoY, scaledLogoWidth, scaledLogoHeight);
   } catch (e) {
     console.error("Failed to load SK logo:", e);
   }
