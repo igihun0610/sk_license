@@ -22,7 +22,7 @@ const LicenseCard = forwardRef<HTMLDivElement, LicenseCardProps>(
 
     // Refs for smooth animation
     const targetTilt = useRef({ x: 0, y: 0 });
-    const animationRef = useRef<number>();
+    const animationRef = useRef<number | null>(null);
 
     // Check if mobile device
     useEffect(() => {
