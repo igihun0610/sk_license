@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 
-const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY || "AIzaSyCCzDcXjtotVGDHtgeropcHBvrkYLbJ9c4";
+const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
+
+if (!GOOGLE_API_KEY) {
+  console.error("GOOGLE_API_KEY is not configured");
+}
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 2000; // 2 seconds
