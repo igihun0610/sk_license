@@ -15,7 +15,7 @@ export default function Home() {
       <div className="mb-8 text-center">
         <div className="text-6xl mb-4 animate-float">🧑‍🚀</div>
         <div className="text-sm tracking-widest text-space-gold font-semibold mb-2">
-          SK NEW CREW
+          2026 SK 신입구성원 과정
         </div>
       </div>
 

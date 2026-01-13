@@ -114,7 +114,7 @@ const LicenseCard = forwardRef<HTMLDivElement, LicenseCardProps>(
               <div className="w-8 h-8 rounded-full bg-yellow-400/20 flex items-center justify-center">
                 <span className="text-sm">🧑‍🚀</span>
               </div>
-              <span className="text-gray-400 text-xs">SK NEW CREW</span>
+              <span className="text-gray-400 text-xs">2026 SK 신입구성원 과정</span>
             </div>
             <div className="text-right">
               <p className="text-gray-500 text-[10px] tracking-wider">ISSUED</p>

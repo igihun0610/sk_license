@@ -122,7 +122,7 @@ export async function generateLicenseImage(data: LicenseData): Promise<string> {
   const commitmentText = `"${commitment}"`;
   wrapText(ctx, commitmentText, 180, 430, 220, 18);
 
-  // Footer - SK NEW CREW
+  // Footer - 2026 SK 신입구성원 과정
   ctx.fillStyle = "rgba(250, 204, 21, 0.2)";
   ctx.beginPath();
   ctx.arc(45, 520, 16, 0, Math.PI * 2);
@@ -134,7 +134,7 @@ export async function generateLicenseImage(data: LicenseData): Promise<string> {
   ctx.fillStyle = "#9ca3af";
   ctx.font = "11px Arial";
   ctx.textAlign = "left";
-  ctx.fillText("SK NEW CREW", 70, 524);
+  ctx.fillText("2026 SK 신입구성원 과정", 70, 524);
 
   // Footer - ISSUED date
   ctx.textAlign = "right";
