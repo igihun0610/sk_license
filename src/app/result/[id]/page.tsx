@@ -114,8 +114,8 @@ export default function ResultPage({ params }: { params: Promise<{ id: string }>
         </p>
       </div>
 
-      {/* License Card */}
-      <div className="mb-4 transform scale-[0.85] origin-top">
+      {/* License Card - scale creates empty space, compensate with negative margin */}
+      <div className="mb-4 transform scale-[0.85] origin-top" style={{ marginBottom: "-70px" }}>
         <LicenseCard
           ref={cardRef}
           name={userInfo.name}
