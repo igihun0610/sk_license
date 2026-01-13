@@ -167,11 +167,6 @@ export default function ResultPage({ params }: { params: Promise<{ id: string }>
         </button>
       </div>
 
-      {/* Decorative elements */}
-      <div className="absolute top-16 left-6 text-2xl animate-float">🎊</div>
-      <div className="absolute top-24 right-8 text-xl animate-float" style={{ animationDelay: "1s" }}>✨</div>
-      <div className="absolute bottom-40 left-10 text-2xl animate-float" style={{ animationDelay: "2s" }}>🌟</div>
-      <div className="absolute bottom-32 right-6 text-3xl animate-float" style={{ animationDelay: "0.5s" }}>🚀</div>
     </div>
   );
 }

@@ -63,9 +63,9 @@ const LicenseCard = forwardRef<HTMLDivElement, LicenseCardProps>(
       const { beta, gamma } = event;
       if (beta !== null && gamma !== null) {
         setIsGyroActive(true);
-        // Smoother tilt calculation with reduced sensitivity
-        const tiltX = Math.max(-12, Math.min(12, gamma * 0.3));
-        const tiltY = Math.max(-12, Math.min(12, (beta - 45) * 0.3));
+        // Increased sensitivity and max tilt for mobile
+        const tiltX = Math.max(-20, Math.min(20, gamma * 0.5));
+        const tiltY = Math.max(-20, Math.min(20, (beta - 45) * 0.5));
         targetTilt.current = { x: tiltX, y: tiltY };
       }
     }, []);
