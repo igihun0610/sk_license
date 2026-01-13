@@ -106,11 +106,25 @@ export async function generateLicenseImage(data: LicenseData): Promise<string> {
     ctx.fill();
   });
 
+  // Draw title first - above photo
+  const titleStartY = 20; // Top padding
+
+  // SK 신입구성원 text
+  ctx.fillStyle = "rgba(250, 204, 21, 0.8)";
+  ctx.font = "bold 11px Arial";
+  ctx.textAlign = "center";
+  ctx.fillText("— SK 신입구성원 —", 180, titleStartY);
+
+  // PILOT LICENSE text
+  ctx.fillStyle = "#ffd700";
+  ctx.font = "bold 24px Arial";
+  ctx.fillText("PILOT LICENSE", 180, titleStartY + 26);
+
   // Load and draw photo - rectangular for upper body portrait (1.2x enlarged)
   const photoWidth = 268; // 224 * 1.2 = 268px
   const photoHeight = 346; // 288 * 1.2 = 346px
   const photoX = (360 - photoWidth) / 2; // Center horizontally
-  const photoY = 16; // Top padding
+  const photoY = titleStartY + 40; // Below title
   const borderRadius = 16; // rounded-2xl
 
   try {
@@ -151,18 +165,8 @@ export async function generateLicenseImage(data: LicenseData): Promise<string> {
     console.error("Failed to load photo:", e);
   }
 
-  // SK 신입구성원 text - adjusted for larger photo
+  // Text below photo
   const textStartY = photoY + photoHeight + 16; // 16px below photo
-
-  ctx.fillStyle = "rgba(250, 204, 21, 0.8)";
-  ctx.font = "bold 11px Arial";
-  ctx.textAlign = "center";
-  ctx.fillText("— SK 신입구성원 —", 180, textStartY);
-
-  // PILOT LICENSE text
-  ctx.fillStyle = "#ffd700";
-  ctx.font = "bold 24px Arial";
-  ctx.fillText("PILOT LICENSE", 180, textStartY + 30);
 
   // Name
   ctx.fillStyle = "#ffffff";

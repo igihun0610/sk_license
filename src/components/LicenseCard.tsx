@@ -95,6 +95,27 @@ const LicenseCard = forwardRef<HTMLDivElement, LicenseCardProps>(
 
         {/* Content */}
         <div className="relative z-10 flex flex-col items-center pt-4 px-6 pb-0">
+          {/* Title - moved above photo */}
+          <div className="text-center mb-3">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <div className="h-px w-8 bg-gradient-to-r from-transparent to-yellow-400/70" />
+              <span className="text-yellow-400 text-xs tracking-[0.3em] font-medium">
+                SK 신입구성원
+              </span>
+              <div className="h-px w-8 bg-gradient-to-l from-transparent to-yellow-400/70" />
+            </div>
+            <h2
+              className="text-2xl font-bold tracking-wider"
+              style={{
+                background: "linear-gradient(180deg, #ffd700 0%, #ffaa00 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              PILOT LICENSE
+            </h2>
+          </div>
+
           {/* Photo frame - rectangular for upper body portrait (1.2x enlarged) */}
           <div className="relative mb-3">
             <div
@@ -120,27 +141,6 @@ const LicenseCard = forwardRef<HTMLDivElement, LicenseCardProps>(
                 background: "linear-gradient(180deg, transparent 70%, rgba(255, 215, 0, 0.1) 100%)",
               }}
             />
-          </div>
-
-          {/* Title */}
-          <div className="text-center mb-4">
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <div className="h-px w-8 bg-gradient-to-r from-transparent to-yellow-400/70" />
-              <span className="text-yellow-400 text-xs tracking-[0.3em] font-medium">
-                SK 신입구성원
-              </span>
-              <div className="h-px w-8 bg-gradient-to-l from-transparent to-yellow-400/70" />
-            </div>
-            <h2
-              className="text-2xl font-bold tracking-wider"
-              style={{
-                background: "linear-gradient(180deg, #ffd700 0%, #ffaa00 100%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-              }}
-            >
-              PILOT LICENSE
-            </h2>
           </div>
 
           {/* Name */}
