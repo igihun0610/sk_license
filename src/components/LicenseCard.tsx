@@ -1,7 +1,6 @@
 "use client";
 
 import { forwardRef } from "react";
-import Image from "next/image";
 
 interface LicenseCardProps {
   name: string;
@@ -45,12 +44,14 @@ const LicenseCard = forwardRef<HTMLDivElement, LicenseCardProps>(
                 boxShadow: "0 0 30px rgba(255, 215, 0, 0.4), 0 0 60px rgba(255, 215, 0, 0.2)",
               }}
             >
-              <Image
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src={photoUrl}
                 alt={name}
                 width={160}
                 height={160}
                 className="w-full h-full object-cover"
+                crossOrigin="anonymous"
               />
             </div>
             {/* Glow ring */}
