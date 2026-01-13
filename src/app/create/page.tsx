@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLicenseStore } from "@/lib/store";
+import { UserCircleIcon } from "@heroicons/react/24/outline";
 
 export default function CreatePage() {
   const router = useRouter();
@@ -45,8 +46,9 @@ export default function CreatePage() {
         >
           ← 뒤로
         </button>
-        <h1 className="text-2xl font-bold text-white mb-2">
-          기본 정보 입력 👤
+        <h1 className="text-2xl font-bold text-white mb-2 flex items-center gap-2">
+          기본 정보 입력
+          <UserCircleIcon className="h-7 w-7 text-space-gold" />
         </h1>
         <p className="text-gray-400 text-sm">
           라이선스에 표시될 정보를 입력해주세요
@@ -81,7 +83,7 @@ export default function CreatePage() {
             type="text"
             value={userInfo.name}
             onChange={(e) => setUserInfo({ name: e.target.value })}
-            placeholder="이기훈"
+            placeholder="홍길동"
             className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-space-gold focus:ring-1 focus:ring-space-gold transition-colors"
           />
           {errors.name && (
@@ -98,7 +100,7 @@ export default function CreatePage() {
             type="text"
             value={userInfo.company}
             onChange={(e) => setUserInfo({ company: e.target.value })}
-            placeholder="SK AX"
+            placeholder="SK OOO"
             className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-space-gold focus:ring-1 focus:ring-space-gold transition-colors"
           />
           {errors.company && (

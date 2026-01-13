@@ -18,115 +18,179 @@ export async function generateLicenseImage(data: LicenseData): Promise<string> {
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Canvas context not available");
 
+  // Calculate dynamic height based on commitment text length
+  const baseHeight = 640;
+  const commitmentLength = commitment.length;
+  // Add extra height for longer commitments (roughly 20px per extra line)
+  const extraHeight = commitmentLength > 20 ? Math.ceil((commitmentLength - 20) / 15) * 20 : 0;
+  const dynamicHeight = Math.max(baseHeight, baseHeight + extraHeight);
+
   // Set dimensions (2x for retina)
   const scale = 2;
   const width = 360 * scale;
-  const height = 560 * scale;
+  const height = dynamicHeight * scale;
   canvas.width = width;
   canvas.height = height;
   ctx.scale(scale, scale);
 
-  // Background gradient
-  const gradient = ctx.createLinearGradient(0, 0, 0, 560);
-  gradient.addColorStop(0, "#0d1b2a");
-  gradient.addColorStop(0.5, "#1b1464");
-  gradient.addColorStop(1, "#2d1b69");
+  // Background gradient - deep space
+  const gradient = ctx.createLinearGradient(0, 0, 0, dynamicHeight);
+  gradient.addColorStop(0, "#0a0a1a");
+  gradient.addColorStop(0.3, "#0d1b2a");
+  gradient.addColorStop(0.6, "#1a1a3e");
+  gradient.addColorStop(1, "#2d1b4e");
   ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, 360, 560);
+  ctx.fillRect(0, 0, 360, dynamicHeight);
 
-  // Draw decorative elements (stars, etc.)
-  ctx.font = "24px Arial";
-  ctx.fillText("✨", 24, 40);
-  ctx.fillText("🌟", 310, 45);
-  ctx.font = "16px Arial";
-  ctx.fillText("⭐", 90, 70);
-  ctx.fillText("🚀", 310, 180);
-  ctx.font = "20px Arial";
-  ctx.fillText("🪐", 30, 430);
-  ctx.fillText("🌙", 310, 460);
-  ctx.font = "14px Arial";
-  ctx.fillText("★", 20, 300);
+  // Nebula glow effects
+  // Purple nebula - top right
+  const nebula1 = ctx.createRadialGradient(380, -50, 0, 380, -50, 200);
+  nebula1.addColorStop(0, "rgba(147, 51, 234, 0.3)");
+  nebula1.addColorStop(0.7, "rgba(147, 51, 234, 0.1)");
+  nebula1.addColorStop(1, "rgba(147, 51, 234, 0)");
+  ctx.fillStyle = nebula1;
+  ctx.fillRect(0, 0, 360, 300);
 
-  // Load and draw photo
+  // Blue nebula - left side
+  const nebula2 = ctx.createRadialGradient(-30, 200, 0, -30, 200, 180);
+  nebula2.addColorStop(0, "rgba(59, 130, 246, 0.25)");
+  nebula2.addColorStop(0.7, "rgba(59, 130, 246, 0.08)");
+  nebula2.addColorStop(1, "rgba(59, 130, 246, 0)");
+  ctx.fillStyle = nebula2;
+  ctx.fillRect(0, 50, 200, 350);
+
+  // Pink nebula - bottom right
+  const nebula3 = ctx.createRadialGradient(380, dynamicHeight - 140, 0, 380, dynamicHeight - 140, 150);
+  nebula3.addColorStop(0, "rgba(236, 72, 153, 0.2)");
+  nebula3.addColorStop(0.7, "rgba(236, 72, 153, 0.05)");
+  nebula3.addColorStop(1, "rgba(236, 72, 153, 0)");
+  ctx.fillStyle = nebula3;
+  ctx.fillRect(150, dynamicHeight - 290, 210, 290);
+
+  // Cyan nebula - bottom left
+  const nebula4 = ctx.createRadialGradient(50, dynamicHeight - 190, 0, 50, dynamicHeight - 190, 120);
+  nebula4.addColorStop(0, "rgba(34, 211, 238, 0.15)");
+  nebula4.addColorStop(0.7, "rgba(34, 211, 238, 0.05)");
+  nebula4.addColorStop(1, "rgba(34, 211, 238, 0)");
+  ctx.fillStyle = nebula4;
+  ctx.fillRect(0, dynamicHeight - 290, 180, 200);
+
+  // Draw stars
+  const stars = [
+    { x: 20, y: 30, size: 1.5, opacity: 1 },
+    { x: 40, y: 70, size: 1, opacity: 0.8 },
+    { x: 90, y: 40, size: 1, opacity: 0.6 },
+    { x: 130, y: 80, size: 2, opacity: 1 },
+    { x: 160, y: 120, size: 1, opacity: 0.7 },
+    { x: 200, y: 50, size: 1, opacity: 0.5 },
+    { x: 250, y: 150, size: 2, opacity: 1 },
+    { x: 280, y: 90, size: 1, opacity: 0.6 },
+    { x: 310, y: 200, size: 1, opacity: 0.8 },
+    { x: 50, y: 250, size: 1, opacity: 0.5 },
+    { x: 100, y: 300, size: 2, opacity: 1 },
+    { x: 180, y: 280, size: 1, opacity: 0.7 },
+    { x: 300, y: 320, size: 1, opacity: 0.8 },
+    { x: 70, y: 400, size: 2, opacity: 1 },
+    { x: 150, y: 450, size: 1, opacity: 0.5 },
+    { x: 320, y: 480, size: 1, opacity: 0.6 },
+    { x: 30, y: 520, size: 2, opacity: 1 },
+    { x: 120, y: 580, size: 1, opacity: 0.8 },
+    { x: 260, y: 550, size: 1, opacity: 0.5 },
+    { x: 340, y: 600, size: 1, opacity: 0.7 },
+  ];
+
+  stars.forEach((star) => {
+    ctx.beginPath();
+    ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255, 255, 255, ${star.opacity})`;
+    ctx.fill();
+  });
+
+  // Load and draw photo - rectangular for upper body portrait (1.2x enlarged)
+  const photoWidth = 268; // 224 * 1.2 = 268px
+  const photoHeight = 346; // 288 * 1.2 = 346px
+  const photoX = (360 - photoWidth) / 2; // Center horizontally
+  const photoY = 16; // Top padding
+  const borderRadius = 16; // rounded-2xl
+
   try {
     const photo = await loadImage(photoUrl);
 
-    // Draw circular photo
+    // Draw rounded rectangle clip for photo
     ctx.save();
     ctx.beginPath();
-    ctx.arc(180, 130, 75, 0, Math.PI * 2);
-    ctx.closePath();
+    roundRect(ctx, photoX, photoY, photoWidth, photoHeight, borderRadius);
     ctx.clip();
 
     // Draw image with aspect ratio preserved (cover behavior)
-    const targetSize = 150;
     const imgWidth = photo.naturalWidth || photo.width;
     const imgHeight = photo.naturalHeight || photo.height;
 
     // Calculate scale to cover the target area while maintaining aspect ratio
-    const scale2 = Math.max(targetSize / imgWidth, targetSize / imgHeight);
+    const scale2 = Math.max(photoWidth / imgWidth, photoHeight / imgHeight);
     const scaledWidth = imgWidth * scale2;
     const scaledHeight = imgHeight * scale2;
 
-    // Center the image
-    const offsetX = 180 - scaledWidth / 2;
-    const offsetY = 130 - scaledHeight / 2;
+    // Center horizontally, align to top for upper body photos
+    const offsetX = photoX + (photoWidth - scaledWidth) / 2;
+    const offsetY = photoY;
 
     ctx.drawImage(photo, offsetX, offsetY, scaledWidth, scaledHeight);
     ctx.restore();
 
-    // Draw photo border
+    // Draw photo border with glow
     ctx.strokeStyle = "rgba(250, 204, 21, 0.7)";
     ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.arc(180, 130, 77, 0, Math.PI * 2);
-    ctx.stroke();
-
-    // Glow effect
     ctx.shadowColor = "rgba(255, 215, 0, 0.4)";
     ctx.shadowBlur = 20;
     ctx.beginPath();
-    ctx.arc(180, 130, 77, 0, Math.PI * 2);
+    roundRect(ctx, photoX - 2, photoY - 2, photoWidth + 4, photoHeight + 4, borderRadius);
     ctx.stroke();
     ctx.shadowBlur = 0;
   } catch (e) {
     console.error("Failed to load photo:", e);
   }
 
-  // SK 신입구성원 text
+  // SK 신입구성원 text - adjusted for larger photo
+  const textStartY = photoY + photoHeight + 16; // 16px below photo
+
   ctx.fillStyle = "rgba(250, 204, 21, 0.8)";
   ctx.font = "bold 11px Arial";
   ctx.textAlign = "center";
-  ctx.fillText("— SK 신입구성원 —", 180, 240);
+  ctx.fillText("— SK 신입구성원 —", 180, textStartY);
 
   // PILOT LICENSE text
   ctx.fillStyle = "#ffd700";
   ctx.font = "bold 24px Arial";
-  ctx.fillText("PILOT LICENSE", 180, 275);
+  ctx.fillText("PILOT LICENSE", 180, textStartY + 30);
 
   // Name
   ctx.fillStyle = "#ffffff";
-  ctx.font = "bold 26px Arial";
-  ctx.fillText(name, 180, 320);
+  ctx.font = "bold 30px Arial";
+  ctx.fillText(name, 180, textStartY + 72);
 
   // Company
   ctx.fillStyle = "#d1d5db";
-  ctx.font = "14px Arial";
-  ctx.fillText(company, 180, 350);
+  ctx.font = "16px Arial";
+  ctx.fillText(company, 180, textStartY + 100);
 
-  // Commitment box
+  // Commitment box - dynamic height based on text length
+  const commitmentBoxHeight = 50 + extraHeight;
   ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
   ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
   ctx.lineWidth = 1;
-  roundRect(ctx, 60, 395, 240, 60, 12);
+  roundRect(ctx, 60, textStartY + 115, 240, commitmentBoxHeight, 12);
   ctx.fill();
   ctx.stroke();
 
   // Commitment text
   ctx.fillStyle = "#e5e7eb";
-  ctx.font = "italic 13px Arial";
+  ctx.font = "italic 15px Arial";
   const commitmentText = `"${commitment}"`;
-  wrapText(ctx, commitmentText, 180, 430, 220, 18);
+  wrapText(ctx, commitmentText, 180, textStartY + 145, 220, 18);
+
+  // Footer position - relative to dynamic height
+  const footerY = dynamicHeight - 40;
 
   // Footer - 2026 SK 신입구성원 과정
   // Draw SK logo with aspect ratio preserved
@@ -141,9 +205,9 @@ export async function generateLicenseImage(data: LicenseData): Promise<string> {
     const scaledLogoWidth = logoWidth * logoScale;
     const scaledLogoHeight = logoHeight * logoScale;
 
-    // Center vertically at y=520
+    // Position relative to footer
     const logoX = 30;
-    const logoY = 520 - scaledLogoHeight / 2;
+    const logoY = footerY - scaledLogoHeight / 2;
 
     ctx.drawImage(skLogo, logoX, logoY, scaledLogoWidth, scaledLogoHeight);
   } catch (e) {
@@ -153,19 +217,19 @@ export async function generateLicenseImage(data: LicenseData): Promise<string> {
   ctx.fillStyle = "#9ca3af";
   ctx.font = "11px Arial";
   ctx.textAlign = "left";
-  ctx.fillText("2026 SK 신입구성원 과정", 62, 524);
+  ctx.fillText("2026 SK 신입구성원 과정", 62, footerY + 4);
 
   // Footer - ISSUED date
   ctx.textAlign = "right";
   ctx.fillStyle = "#6b7280";
   ctx.font = "9px Arial";
-  ctx.fillText("ISSUED", 330, 510);
+  ctx.fillText("ISSUED", 330, footerY - 10);
 
   ctx.fillStyle = "#d1d5db";
   ctx.font = "14px Arial";
   const today = new Date();
   const issueDate = `${today.getFullYear()}.${String(today.getMonth() + 1).padStart(2, "0")}`;
-  ctx.fillText(issueDate, 330, 528);
+  ctx.fillText(issueDate, 330, footerY + 8);
 
   // Return as data URL
   return canvas.toDataURL("image/png", 1.0);

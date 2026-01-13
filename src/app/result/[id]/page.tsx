@@ -6,6 +6,7 @@ import { toPng } from "html-to-image";
 import LicenseCard from "@/components/LicenseCard";
 import { useLicenseStore } from "@/lib/store";
 import { generateLicenseImage } from "@/lib/generateLicenseImage";
+import { ArrowDownTrayIcon, ShareIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
 
 export default function ResultPage({ params }: { params: Promise<{ id: string }> }) {
   use(params); // Consume params to avoid warnings
@@ -17,6 +18,13 @@ export default function ResultPage({ params }: { params: Promise<{ id: string }>
 
   // Use transformed photo if available, otherwise fallback to original
   const displayPhotoUrl = userInfo.transformedPhotoUrl || userInfo.photoUrl;
+
+  // Redirect if no photo available
+  useEffect(() => {
+    if (!displayPhotoUrl) {
+      router.push("/");
+    }
+  }, [displayPhotoUrl, router]);
 
   // Preload image to ensure it's cached
   useEffect(() => {
@@ -94,7 +102,6 @@ export default function ResultPage({ params }: { params: Promise<{ id: string }>
   };
 
   if (!displayPhotoUrl) {
-    router.push("/");
     return null;
   }
 
@@ -110,7 +117,7 @@ export default function ResultPage({ params }: { params: Promise<{ id: string }>
         </p>
       </div>
 
-      {/* License Card - scale creates empty space, compensate with negative margin */}
+      {/* License Card - mobile optimized */}
       <div className="mb-4 transform scale-[0.85] origin-top" style={{ marginBottom: "-70px" }}>
         <LicenseCard
           ref={cardRef}
@@ -130,10 +137,14 @@ export default function ResultPage({ params }: { params: Promise<{ id: string }>
         >
           {isDownloading ? (
             <span className="flex items-center justify-center gap-2">
-              <span className="animate-spin">⏳</span> 저장 중...
+              <ArrowPathIcon className="h-5 w-5 animate-spin" />
+              저장 중...
             </span>
           ) : (
-            "이미지 저장하기 📥"
+            <span className="flex items-center justify-center gap-2">
+              <ArrowDownTrayIcon className="h-5 w-5" />
+              이미지 저장하기
+            </span>
           )}
         </button>
 
@@ -141,13 +152,17 @@ export default function ResultPage({ params }: { params: Promise<{ id: string }>
           onClick={handleShare}
           className="w-full bg-white/10 backdrop-blur-sm text-white font-medium py-4 px-8 rounded-full text-lg border border-white/20 hover:bg-white/20 transition-all duration-300"
         >
-          공유하기 📤
+          <span className="flex items-center justify-center gap-2">
+            <ShareIcon className="h-5 w-5" />
+            공유하기
+          </span>
         </button>
 
         <button
           onClick={handleCreateNew}
-          className="w-full text-gray-400 py-3 text-sm hover:text-white transition-colors"
+          className="w-full text-gray-400 py-3 text-sm hover:text-white transition-colors flex items-center justify-center gap-1"
         >
+          <ArrowPathIcon className="h-4 w-4" />
           처음부터 다시 만들기
         </button>
       </div>

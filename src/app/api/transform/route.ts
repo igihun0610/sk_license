@@ -3,6 +3,13 @@ import { GoogleGenAI } from "@google/genai";
 
 const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY || "AIzaSyCCzDcXjtotVGDHtgeropcHBvrkYLbJ9c4";
 
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 2000; // 2 seconds
+
+async function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { photoUrl } = await request.json();
@@ -23,7 +30,7 @@ export async function POST(request: NextRequest) {
     // Initialize Google AI client
     const ai = new GoogleGenAI({ apiKey: GOOGLE_API_KEY });
 
-    // Transform image to astronaut style
+    // Transform image to astronaut style using Nano Banana model
     const prompt = [
       {
         inlineData: {
@@ -32,46 +39,95 @@ export async function POST(request: NextRequest) {
         },
       },
       {
-        text: `Transform this person's photo into a professional astronaut portrait style.
-Keep the person's face exactly the same, but:
-- Add a realistic NASA/space agency style astronaut suit
-- Add a space helmet (visor up, showing face clearly)
-- Use a cosmic space background with stars and nebula
-- Make it look like an official astronaut ID photo
-- Maintain high quality and professional appearance
-- Keep the person's facial features, expression, and likeness identical to the original`,
+        text: `Transform this person into an astronaut portrait photo.
+
+=== HIGHEST PRIORITY: IDENTITY PRESERVATION ===
+The person's identity MUST be 100% preserved:
+• FACE: Keep every facial feature EXACTLY identical - eyes, nose, lips, chin, jawline, cheekbones, skin tone, wrinkles, moles, freckles
+• HAIR: Keep the EXACT same hairstyle, hair color, hair length, hair texture, parting style
+• EXPRESSION: Maintain the same facial expression and mood
+• This is NON-NEGOTIABLE - the output must be recognizable as the SAME person
+
+=== COMPOSITION: MEDIUM CLOSE-UP (MCU) ===
+• Frame from chest/upper torso to top of head
+• Face should occupy significant portion of the frame
+• Professional portrait composition with balanced headroom
+• NO helmet or visor - face must be completely visible and unobstructed
+
+=== OUTFIT TRANSFORMATION ===
+• Replace clothing with a WHITE NASA-style astronaut suit
+• Add "SK" LOGO PATCH prominently on the chest area (red "SK" letters on white background patch)
+• Add a KOREAN FLAG (Taegeukgi/태극기) patch on the shoulder or arm area
+• Include realistic suit details: mission patches, zippers, life support connectors
+• The suit should look authentic and high-quality
+
+=== BACKGROUND & LIGHTING ===
+• Cosmic space background with stars and colorful nebula
+• Professional studio lighting on the face
+• Subtle rim lighting to separate subject from background
+
+=== FINAL OUTPUT ===
+Photorealistic, high-quality Medium Close-Up portrait of the SAME PERSON wearing an SK astronaut suit in space.`,
       },
     ];
 
-    const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash-exp-image-generation",
-      contents: prompt,
-      config: {
-        responseModalities: ["TEXT", "IMAGE"],
-      },
-    });
+    // Retry logic for API call
+    let lastError: Error | null = null;
 
-    // Extract the generated image
-    if (response.candidates && response.candidates[0]?.content?.parts) {
-      for (const part of response.candidates[0].content.parts) {
-        if (part.inlineData) {
-          const generatedImageData = part.inlineData.data;
-          const generatedMimeType = part.inlineData.mimeType || "image/png";
-          const transformedPhotoUrl = `data:${generatedMimeType};base64,${generatedImageData}`;
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        console.log(`API attempt ${attempt}/${MAX_RETRIES}`);
 
-          return NextResponse.json({
-            success: true,
-            transformedPhotoUrl
-          });
+        const response = await ai.models.generateContent({
+          model: "gemini-2.5-flash-image",
+          contents: prompt,
+          config: {
+            responseModalities: ["TEXT", "IMAGE"],
+          },
+        });
+
+        // Extract the generated image
+        if (response.candidates && response.candidates[0]?.content?.parts) {
+          for (const part of response.candidates[0].content.parts) {
+            if (part.inlineData) {
+              const generatedImageData = part.inlineData.data;
+              const generatedMimeType = part.inlineData.mimeType || "image/png";
+              const transformedPhotoUrl = `data:${generatedMimeType};base64,${generatedImageData}`;
+
+              console.log(`API success on attempt ${attempt}`);
+              return NextResponse.json({
+                success: true,
+                transformedPhotoUrl
+              });
+            }
+          }
+        }
+
+        // If no image was generated, return original
+        console.log("No image generated, using original");
+        return NextResponse.json({
+          success: true,
+          transformedPhotoUrl: photoUrl,
+          message: "Could not generate transformed image, using original"
+        });
+
+      } catch (apiError) {
+        lastError = apiError instanceof Error ? apiError : new Error(String(apiError));
+        console.error(`API attempt ${attempt} failed:`, lastError.message);
+
+        if (attempt < MAX_RETRIES) {
+          console.log(`Retrying in ${RETRY_DELAY}ms...`);
+          await sleep(RETRY_DELAY);
         }
       }
     }
 
-    // If no image was generated, return original
+    // All retries failed, return original photo as fallback
+    console.error("All API attempts failed, using original photo");
     return NextResponse.json({
       success: true,
       transformedPhotoUrl: photoUrl,
-      message: "Could not generate transformed image, using original"
+      message: "API failed after retries, using original photo"
     });
 
   } catch (error) {

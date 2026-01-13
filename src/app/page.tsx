@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { RocketLaunchIcon } from "@heroicons/react/24/solid";
 
 export default function Home() {
   return (
@@ -44,9 +45,10 @@ export default function Home() {
       {/* CTA Button */}
       <Link
         href="/create"
-        className="w-full max-w-xs bg-gradient-to-r from-yellow-500 to-orange-500 text-space-dark font-bold py-4 px-8 rounded-full text-center text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 glow"
+        className="w-full max-w-xs bg-gradient-to-r from-yellow-500 to-orange-500 text-space-dark font-bold py-4 px-8 rounded-full text-center text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 glow flex items-center justify-center gap-2"
       >
-        라이선스 발급 시작 🚀
+        <RocketLaunchIcon className="h-5 w-5" />
+        라이선스 발급 시작
       </Link>
 
       {/* Footer info */}

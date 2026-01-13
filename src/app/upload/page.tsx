@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useLicenseStore } from "@/lib/store";
+import { RocketLaunchIcon, ArrowPathIcon, CameraIcon } from "@heroicons/react/24/outline";
 
 // Compress image to reduce size
 const compressImage = (file: File, maxWidth = 800): Promise<string> => {
@@ -85,34 +86,8 @@ export default function UploadPage() {
 
     setIsUploading(true);
 
-    try {
-      // Call AI transformation API
-      const response = await fetch("/api/transform", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          photoUrl: previewUrl,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (data.transformedPhotoUrl) {
-        setUserInfo({ transformedPhotoUrl: data.transformedPhotoUrl });
-      } else {
-        // Fallback to original photo if transformation fails
-        setUserInfo({ transformedPhotoUrl: previewUrl });
-      }
-
-      router.push("/result/direct");
-    } catch (error) {
-      console.error("Transform error:", error);
-      // Fallback to original photo on error
-      setUserInfo({ transformedPhotoUrl: previewUrl });
-      router.push("/result/direct");
-    }
+    // Navigate to processing page - AI transformation happens there
+    router.push("/processing");
   };
 
   return (
@@ -125,11 +100,12 @@ export default function UploadPage() {
         >
           ← 뒤로
         </button>
-        <h1 className="text-2xl font-bold text-white mb-2">
-          프로필 사진 📸
+        <h1 className="text-2xl font-bold text-white mb-2 flex items-center gap-2">
+          프로필 사진
+          <CameraIcon className="h-7 w-7 text-space-gold" />
         </h1>
         <p className="text-gray-400 text-sm">
-          우주비행사로 변신할 사진을 선택해주세요
+          라이선스에 들어갈 사진을 선택해주세요
         </p>
       </div>
 
@@ -211,10 +187,14 @@ export default function UploadPage() {
       >
         {isUploading ? (
           <span className="flex items-center justify-center gap-2">
-            <span className="animate-spin">⏳</span> AI 변환 중...
+            <ArrowPathIcon className="h-5 w-5 animate-spin" />
+            발급 준비 중...
           </span>
         ) : (
-          "우주비행사 변신 🚀"
+          <span className="flex items-center justify-center gap-2">
+            <RocketLaunchIcon className="h-5 w-5" />
+            라이선스 발급하기
+          </span>
         )}
       </button>
     </div>
