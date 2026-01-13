@@ -99,35 +99,10 @@ export async function generateLicenseImage(data: LicenseData): Promise<string> {
   ctx.textAlign = "center";
   ctx.fillText("— SK 신입구성원 —", 180, 240);
 
-  // SK Logo + PILOT LICENSE text
-  const pilotLicenseText = "PILOT LICENSE";
-  ctx.font = "bold 24px Arial";
-  const textWidth = ctx.measureText(pilotLicenseText).width;
-  const logoHeight = 24;
-  const logoWidth = 24;
-  const gap = 8;
-  const totalWidth = logoWidth + gap + textWidth;
-  const startX = 180 - totalWidth / 2;
-
-  // Draw SK logo before PILOT LICENSE
-  try {
-    const skLogoTitle = await loadImage("/img/sk.png");
-    const titleLogoWidth = skLogoTitle.naturalWidth || skLogoTitle.width;
-    const titleLogoHeight = skLogoTitle.naturalHeight || skLogoTitle.height;
-    const titleLogoScale = Math.min(logoWidth / titleLogoWidth, logoHeight / titleLogoHeight);
-    const scaledTitleLogoWidth = titleLogoWidth * titleLogoScale;
-    const scaledTitleLogoHeight = titleLogoHeight * titleLogoScale;
-    ctx.drawImage(skLogoTitle, startX, 275 - scaledTitleLogoHeight + 4, scaledTitleLogoWidth, scaledTitleLogoHeight);
-  } catch (e) {
-    console.error("Failed to load SK logo for title:", e);
-  }
-
   // PILOT LICENSE text
   ctx.fillStyle = "#ffd700";
   ctx.font = "bold 24px Arial";
-  ctx.textAlign = "left";
-  ctx.fillText(pilotLicenseText, startX + logoWidth + gap, 275);
-  ctx.textAlign = "center";
+  ctx.fillText("PILOT LICENSE", 180, 275);
 
   // Name
   ctx.fillStyle = "#ffffff";

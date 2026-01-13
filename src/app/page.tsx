@@ -27,15 +27,12 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Main title with astronaut */}
-      <div className="flex flex-col items-center mb-4">
-        <h1 className="text-3xl font-bold text-center text-white mb-3">
-          우주비행사
-          <br />
-          <span className="text-space-gold">라이선스</span> 발급
-        </h1>
-        <div className="text-5xl animate-float">🧑‍🚀</div>
-      </div>
+      {/* Main title */}
+      <h1 className="text-3xl font-bold text-center text-white mb-4">
+        우주비행사
+        <br />
+        <span className="text-space-gold">라이선스</span> 발급
+      </h1>
 
       {/* Description */}
       <p className="text-center text-gray-300 text-sm mb-12 max-w-xs leading-relaxed">
@@ -55,7 +52,6 @@ export default function Home() {
       {/* Footer info */}
       <div className="mt-16 text-center text-gray-500 text-xs">
         <p>© 2026 SK 신입구성원과정</p>
-        <p className="mt-1">Powered by AI ✨</p>
       </div>
     </div>
   );
