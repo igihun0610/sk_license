@@ -43,7 +43,7 @@ const compressImage = (file: File, maxWidth = 800): Promise<string> => {
 
 export default function UploadPage() {
   const router = useRouter();
-  const { userInfo, setUserInfo, setJobId } = useLicenseStore();
+  const { userInfo, setUserInfo } = useLicenseStore();
   const [isUploading, setIsUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(userInfo.photoUrl);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -85,33 +85,14 @@ export default function UploadPage() {
 
     setIsUploading(true);
 
-    try {
-      // Upload photo and get job ID
-      const response = await fetch("/api/process", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          photoUrl: previewUrl,
-          name: userInfo.name,
-          company: userInfo.company,
-          commitment: userInfo.commitment,
-        }),
-      });
+    // Skip server processing - use photo directly
+    // In production, this would call AI API for image transformation
+    setUserInfo({ transformedPhotoUrl: previewUrl });
 
-      if (!response.ok) {
-        throw new Error("처리 요청에 실패했습니다.");
-      }
+    // Short delay for UX
+    await new Promise(resolve => setTimeout(resolve, 500));
 
-      const data = await response.json();
-      setJobId(data.jobId);
-      router.push(`/processing/${data.jobId}`);
-    } catch (error) {
-      console.error(error);
-      alert("오류가 발생했습니다. 다시 시도해주세요.");
-      setIsUploading(false);
-    }
+    router.push("/result/direct");
   };
 
   return (
