@@ -48,17 +48,26 @@ The person's identity MUST be 100% preserved:
 • EXPRESSION: Maintain the same facial expression and mood
 • This is NON-NEGOTIABLE - the output must be recognizable as the SAME person
 
-=== COMPOSITION: MEDIUM CLOSE-UP (MCU) ===
-• Frame from chest/upper torso to top of head
-• Face should occupy significant portion of the frame
-• Professional portrait composition with balanced headroom
+=== COMPOSITION: BUST SHOT (CRITICAL) ===
+• BUST SHOT FRAMING: Head + Shoulders + Chest area visible
+• Frame the subject from mid-chest level to top of head
+• This is a PORTRAIT composition - like a formal yearbook photo
+• Face should be prominent but NOT fill the entire frame
+• Include enough space to show the astronaut suit details on chest/shoulders
+• Professional portrait with balanced headroom
 • NO helmet or visor - face must be completely visible and unobstructed
+• DO NOT crop too tight - we need to see the suit and patches
 
-=== OUTFIT TRANSFORMATION ===
-• Replace clothing with a WHITE NASA-style astronaut suit
-• Add "SK" LOGO PATCH prominently on the chest area (red "SK" letters on white background patch)
-• Add a KOREAN FLAG (Taegeukgi/태극기) patch on the shoulder or arm area
-• Include realistic suit details: mission patches, zippers, life support connectors
+=== OUTFIT TRANSFORMATION (CRITICAL) ===
+• Replace clothing with a WHITE professional astronaut suit
+
+*** SK LOGO - MAIN CHEST LOGO (REQUIRED) ***
+• The MAIN logo on the chest must be SK logo (South Korean conglomerate)
+• SK logo color: RED letters "SK"
+• Place SK logo on the chest area as an embroidered patch sewn onto the suit
+
+• Add a KOREAN FLAG (Taegeukgi/태극기) patch on the chest area
+• Include realistic suit details: zippers, life support connectors
 • The suit should look authentic and high-quality
 
 === BACKGROUND & LIGHTING ===
@@ -67,7 +76,7 @@ The person's identity MUST be 100% preserved:
 • Subtle rim lighting to separate subject from background
 
 === FINAL OUTPUT ===
-Photorealistic, high-quality Medium Close-Up portrait of the SAME PERSON wearing an SK astronaut suit in space.`,
+Photorealistic, high-quality BUST SHOT portrait of the SAME PERSON wearing an SK astronaut suit in space. Must show head, shoulders, and chest area with visible suit details and patches.`,
       },
     ];
 

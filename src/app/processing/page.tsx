@@ -106,15 +106,15 @@ export default function ProcessingPage() {
       {/* Main content */}
       <div className="relative z-10 flex flex-col items-center">
         {/* Astronaut animation */}
-        <div className="relative mb-8 w-64 h-64 flex items-center justify-center">
-          {/* Orbiting rocket - behind everything (z-0), larger orbit */}
+        <div className="relative mb-8 w-52 h-52 flex items-center justify-center">
+          {/* Orbiting rocket - behind everything (z-0) */}
           <div
-            className="absolute w-64 h-64 z-0"
+            className="absolute w-52 h-52 z-0"
             style={{
               animation: "spin 4s linear infinite",
             }}
           >
-            <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-3xl">🚀</span>
+            <span className="absolute -top-2 left-1/2 -translate-x-1/2 text-2xl">🚀</span>
           </div>
           {/* Astronaut - in front (z-10) */}
           <div className="relative z-10 text-8xl animate-bounce" style={{ animationDuration: "2s" }}>
