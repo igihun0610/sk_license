@@ -11,6 +11,15 @@ export default function Home() {
       <div className="absolute bottom-32 left-10 text-3xl animate-float" style={{ animationDelay: "2s" }}>🌟</div>
       <div className="absolute bottom-20 right-6 text-4xl animate-float" style={{ animationDelay: "0.5s" }}>🚀</div>
 
+      {/* SK Logo */}
+      <div className="mb-6">
+        <img
+          src="/img/sk.png"
+          alt="SK"
+          className="w-20 h-auto mx-auto drop-shadow-lg"
+        />
+      </div>
+
       {/* Logo area */}
       <div className="mb-8 text-center">
         <div className="text-6xl mb-4 animate-float">🧑‍🚀</div>
