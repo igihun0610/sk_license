@@ -93,17 +93,41 @@ export async function generateLicenseImage(data: LicenseData): Promise<string> {
     console.error("Failed to load photo:", e);
   }
 
-  // SK AEROSPACE text
+  // SK 신입구성원 text
   ctx.fillStyle = "rgba(250, 204, 21, 0.8)";
   ctx.font = "bold 11px Arial";
   ctx.textAlign = "center";
-  ctx.letterSpacing = "3px";
-  ctx.fillText("— SK AEROSPACE —", 180, 240);
+  ctx.fillText("— SK 신입구성원 —", 180, 240);
+
+  // SK Logo + PILOT LICENSE text
+  const pilotLicenseText = "PILOT LICENSE";
+  ctx.font = "bold 24px Arial";
+  const textWidth = ctx.measureText(pilotLicenseText).width;
+  const logoHeight = 24;
+  const logoWidth = 24;
+  const gap = 8;
+  const totalWidth = logoWidth + gap + textWidth;
+  const startX = 180 - totalWidth / 2;
+
+  // Draw SK logo before PILOT LICENSE
+  try {
+    const skLogoTitle = await loadImage("/img/sk.png");
+    const titleLogoWidth = skLogoTitle.naturalWidth || skLogoTitle.width;
+    const titleLogoHeight = skLogoTitle.naturalHeight || skLogoTitle.height;
+    const titleLogoScale = Math.min(logoWidth / titleLogoWidth, logoHeight / titleLogoHeight);
+    const scaledTitleLogoWidth = titleLogoWidth * titleLogoScale;
+    const scaledTitleLogoHeight = titleLogoHeight * titleLogoScale;
+    ctx.drawImage(skLogoTitle, startX, 275 - scaledTitleLogoHeight + 4, scaledTitleLogoWidth, scaledTitleLogoHeight);
+  } catch (e) {
+    console.error("Failed to load SK logo for title:", e);
+  }
 
   // PILOT LICENSE text
   ctx.fillStyle = "#ffd700";
   ctx.font = "bold 24px Arial";
-  ctx.fillText("PILOT LICENSE", 180, 275);
+  ctx.textAlign = "left";
+  ctx.fillText(pilotLicenseText, startX + logoWidth + gap, 275);
+  ctx.textAlign = "center";
 
   // Name
   ctx.fillStyle = "#ffffff";

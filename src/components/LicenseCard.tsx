@@ -68,20 +68,23 @@ const LicenseCard = forwardRef<HTMLDivElement, LicenseCardProps>(
             <div className="flex items-center justify-center gap-2 mb-2">
               <div className="h-px w-8 bg-gradient-to-r from-transparent to-yellow-400/70" />
               <span className="text-yellow-400 text-xs tracking-[0.3em] font-medium">
-                SK AEROSPACE
+                SK 신입구성원
               </span>
               <div className="h-px w-8 bg-gradient-to-l from-transparent to-yellow-400/70" />
             </div>
-            <h2
-              className="text-2xl font-bold tracking-wider"
-              style={{
-                background: "linear-gradient(180deg, #ffd700 0%, #ffaa00 100%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-              }}
-            >
-              PILOT LICENSE
-            </h2>
+            <div className="flex items-center justify-center gap-2">
+              <img src="/img/sk.png" alt="SK" className="h-7 w-auto" />
+              <h2
+                className="text-2xl font-bold tracking-wider"
+                style={{
+                  background: "linear-gradient(180deg, #ffd700 0%, #ffaa00 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                PILOT LICENSE
+              </h2>
+            </div>
           </div>
 
           {/* Name */}
