@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toPng } from "html-to-image";
 import LicenseCard from "@/components/LicenseCard";
 import { useLicenseStore } from "@/lib/store";
+import { generateLicenseImage } from "@/lib/generateLicenseImage";
 
 export default function ResultPage({ params }: { params: Promise<{ id: string }> }) {
   use(params); // Consume params to avoid warnings
@@ -27,19 +28,14 @@ export default function ResultPage({ params }: { params: Promise<{ id: string }>
   }, [displayPhotoUrl]);
 
   const captureCard = async (): Promise<string> => {
-    if (!cardRef.current) throw new Error("Card ref not found");
+    if (!displayPhotoUrl) throw new Error("No photo available");
 
-    // Wait a bit for rendering
-    await new Promise((resolve) => setTimeout(resolve, 100));
-
-    return toPng(cardRef.current, {
-      quality: 1.0,
-      pixelRatio: 2,
-      cacheBust: true,
-      skipAutoScale: true,
-      style: {
-        transform: "scale(1)",
-      },
+    // Use Canvas API for reliable image generation on all devices
+    return generateLicenseImage({
+      name: userInfo.name,
+      company: userInfo.company,
+      commitment: userInfo.commitment,
+      photoUrl: displayPhotoUrl,
     });
   };
 
