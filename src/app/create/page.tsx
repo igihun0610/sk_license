@@ -9,6 +9,7 @@ export default function CreatePage() {
   const router = useRouter();
   const { userInfo, setUserInfo } = useLicenseStore();
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [privacyAgreed, setPrivacyAgreed] = useState(false);
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
@@ -23,6 +24,9 @@ export default function CreatePage() {
       newErrors.commitment = "다짐을 입력해주세요";
     } else if (userInfo.commitment.length > 50) {
       newErrors.commitment = "다짐은 50자 이내로 입력해주세요";
+    }
+    if (!privacyAgreed) {
+      newErrors.privacy = "개인정보 수집·이용에 동의해주세요";
     }
 
     setErrors(newErrors);
@@ -126,6 +130,28 @@ export default function CreatePage() {
           />
           {errors.commitment && (
             <p className="text-red-400 text-sm mt-1">{errors.commitment}</p>
+          )}
+        </div>
+
+        {/* Privacy Agreement */}
+        <div className="mt-2">
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={privacyAgreed}
+              onChange={(e) => setPrivacyAgreed(e.target.checked)}
+              className="mt-1 w-5 h-5 rounded border-white/20 bg-white/10 text-space-gold focus:ring-space-gold focus:ring-offset-0 cursor-pointer"
+            />
+            <span className="text-gray-300 text-sm leading-relaxed">
+              <span className="text-white font-medium">[필수]</span> 개인정보 수집·이용에 동의합니다.
+              <br />
+              <span className="text-gray-500 text-xs">
+                수집항목: 이름, 소속회사, 사진 | 이용목적: 라이선스 발급 | 보유기간: 행사 종료 후 즉시 파기
+              </span>
+            </span>
+          </label>
+          {errors.privacy && (
+            <p className="text-red-400 text-sm mt-2 ml-8">{errors.privacy}</p>
           )}
         </div>
 
