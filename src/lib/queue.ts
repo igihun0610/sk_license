@@ -14,7 +14,7 @@ const getRedis = () => {
 
 const QUEUE_KEY = "transform_queue";
 const PROCESSING_KEY = "transform_processing";
-const MAX_CONCURRENT = 50; // Maximum concurrent transformations (Vercel Pro supports 1000)
+const MAX_CONCURRENT = 100; // Maximum concurrent transformations (Vercel Pro supports 1000)
 const QUEUE_ITEM_TTL = 300; // 5 minutes TTL for queue items
 
 // Lua script for atomic startProcessing operation
