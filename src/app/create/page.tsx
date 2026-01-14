@@ -163,7 +163,7 @@ export default function CreatePage() {
               <ul className="text-gray-400 space-y-1 text-xs">
                 <li><span className="text-gray-300">수집항목:</span> 이름, 소속회사, 사진</li>
                 <li><span className="text-gray-300">이용목적:</span> SK 우주비행사 라이선스 발급</li>
-                <li><span className="text-gray-300">보유기간:</span> 행사 종료 후 즉시 파기</li>
+                <li><span className="text-gray-300">보유기간:</span> 행사 종료 후 30일 이내 파기</li>
               </ul>
               <p className="text-gray-500 text-xs mt-2">
                 * 동의를 거부할 권리가 있으며, 거부 시 라이선스 발급이 제한됩니다.
