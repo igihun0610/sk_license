@@ -53,7 +53,8 @@ export default function Home() {
 
       {/* Footer info */}
       <div className="mt-16 text-center text-gray-500 text-xs">
-        <p>© 2025 이기훈 in SK AX</p>
+        <p>© 2026 신입구성원과정</p>
+        <p>SK AX 이기훈</p>
       </div>
     </div>
   );
