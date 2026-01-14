@@ -10,6 +10,7 @@ export default function CreatePage() {
   const { userInfo, setUserInfo } = useLicenseStore();
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [privacyAgreed, setPrivacyAgreed] = useState(false);
+  const [showPrivacyDetail, setShowPrivacyDetail] = useState(false);
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
@@ -135,21 +136,41 @@ export default function CreatePage() {
 
         {/* Privacy Agreement */}
         <div className="mt-2">
-          <label className="flex items-start gap-3 cursor-pointer">
+          <div className="flex items-center gap-3">
             <input
               type="checkbox"
+              id="privacyCheckbox"
               checked={privacyAgreed}
               onChange={(e) => setPrivacyAgreed(e.target.checked)}
-              className="mt-1 w-5 h-5 rounded border-white/20 bg-white/10 text-space-gold focus:ring-space-gold focus:ring-offset-0 cursor-pointer"
+              className="w-5 h-5 rounded border-white/20 bg-white/10 text-space-gold focus:ring-space-gold focus:ring-offset-0 cursor-pointer"
             />
-            <span className="text-gray-300 text-sm leading-relaxed">
+            <label htmlFor="privacyCheckbox" className="text-gray-300 text-sm cursor-pointer">
               <span className="text-white font-medium">[필수]</span> 개인정보 수집·이용에 동의합니다.
-              <br />
-              <span className="text-gray-500 text-xs">
-                수집항목: 이름, 소속회사, 사진 | 이용목적: 라이선스 발급 | 보유기간: 행사 종료 후 즉시 파기
-              </span>
-            </span>
-          </label>
+            </label>
+            <button
+              type="button"
+              onClick={() => setShowPrivacyDetail(!showPrivacyDetail)}
+              className="text-space-gold text-sm underline hover:text-yellow-400 transition-colors"
+            >
+              {showPrivacyDetail ? "닫기" : "상세보기"}
+            </button>
+          </div>
+
+          {/* Privacy Detail */}
+          {showPrivacyDetail && (
+            <div className="mt-3 ml-8 p-4 bg-white/5 border border-white/10 rounded-xl text-sm">
+              <h4 className="text-white font-medium mb-2">개인정보 수집·이용 안내</h4>
+              <ul className="text-gray-400 space-y-1 text-xs">
+                <li><span className="text-gray-300">수집항목:</span> 이름, 소속회사, 사진</li>
+                <li><span className="text-gray-300">이용목적:</span> SK 우주비행사 라이선스 발급</li>
+                <li><span className="text-gray-300">보유기간:</span> 행사 종료 후 즉시 파기</li>
+              </ul>
+              <p className="text-gray-500 text-xs mt-2">
+                * 동의를 거부할 권리가 있으며, 거부 시 라이선스 발급이 제한됩니다.
+              </p>
+            </div>
+          )}
+
           {errors.privacy && (
             <p className="text-red-400 text-sm mt-2 ml-8">{errors.privacy}</p>
           )}
