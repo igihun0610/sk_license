@@ -88,7 +88,7 @@ export default function CreatePage() {
             type="text"
             value={userInfo.name}
             onChange={(e) => setUserInfo({ name: e.target.value })}
-            placeholder="홍길동"
+            placeholder="이기훈"
             className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-space-gold focus:ring-1 focus:ring-space-gold transition-colors"
           />
           {errors.name && (
@@ -105,7 +105,7 @@ export default function CreatePage() {
             type="text"
             value={userInfo.company}
             onChange={(e) => setUserInfo({ company: e.target.value })}
-            placeholder="SK OOO"
+            placeholder="SK AX"
             className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-space-gold focus:ring-1 focus:ring-space-gold transition-colors"
           />
           {errors.company && (
